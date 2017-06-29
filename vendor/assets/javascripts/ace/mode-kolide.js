@@ -1,9 +1,9 @@
 /* eslint-disable */
-ace.define("ace/mode/kolide_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/sql_highlight_rules"], function(acequire, exports, module) {
+define("ace/mode/kolide_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/sql_highlight_rules"], function(require, exports, module) {
   "use strict";
 
-  var oop = acequire("../lib/oop");
-  var SqlHighlightRules = acequire("./sql_highlight_rules").SqlHighlightRules;
+  var oop = require("../lib/oop");
+  var SqlHighlightRules = require("./sql_highlight_rules").SqlHighlightRules;
 
   var KolideHighlightRules = function() {
     var keywords = (
@@ -97,13 +97,13 @@ ace.define("ace/mode/kolide_highlight_rules",["require","exports","module","ace/
   exports.KolideHighlightRules = KolideHighlightRules;
 });
 
-ace.define("ace/mode/kolide",["require","exports","module","ace/lib/oop","ace/mode/sql","ace/mode/kolide_highlight_rules","ace/range"], function(acequire, exports, module) {
+ace.define("ace/mode/kolide",["require","exports","module","ace/lib/oop","ace/mode/sql","ace/mode/kolide_highlight_rules","ace/range"], function(require, exports, module) {
   "use strict";
 
-  var oop = acequire("../lib/oop");
-  var TextMode = acequire("./sql").Mode;
-  var KolideHighlightRules = acequire("./kolide_highlight_rules").KolideHighlightRules;
-  var Range = acequire("../range").Range;
+  var oop = require("../lib/oop");
+  var TextMode = require("./sql").Mode;
+  var KolideHighlightRules = require("./kolide_highlight_rules").KolideHighlightRules;
+  var Range = require("../range").Range;
 
   var Mode = function() {
     this.HighlightRules = KolideHighlightRules;
