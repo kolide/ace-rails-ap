@@ -101,7 +101,7 @@ ace.define("ace/mode/kolide",["require","exports","module","ace/lib/oop","ace/mo
   "use strict";
 
   var oop = require("../lib/oop");
-  var TextMode = require("./sql").Mode;
+  var TextMode = require("./mode-sql").Mode;
   var KolideHighlightRules = require("./kolide_highlight_rules").KolideHighlightRules;
   var Range = require("../range").Range;
 
