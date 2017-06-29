@@ -97,11 +97,11 @@ define("ace/mode/kolide_highlight_rules",["require","exports","module","ace/lib/
   exports.KolideHighlightRules = KolideHighlightRules;
 });
 
-ace.define("ace/mode/kolide",["require","exports","module","ace/lib/oop","ace/mode/sql","ace/mode/kolide_highlight_rules","ace/range"], function(require, exports, module) {
+define("ace/mode/kolide",["require","exports","module","ace/lib/oop","ace/mode/sql","ace/mode/kolide_highlight_rules","ace/range"], function(require, exports, module) {
   "use strict";
 
   var oop = require("../lib/oop");
-  var TextMode = require("./mode-sql").Mode;
+  var TextMode = require("./sql").Mode;
   var KolideHighlightRules = require("./kolide_highlight_rules").KolideHighlightRules;
   var Range = require("../range").Range;
 
