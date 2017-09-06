@@ -1,283 +1,71 @@
 {
 "tables": [
  {
-  "key": "windows",
-  "name": "Microsoft Windows",
+  "key": "yara",
+  "name": "YARA",
   "tables": [
    {
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Commonly used product name.","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Product version information.","name": "version","options": {},"type": "TEXT_TYPE"},
-     {"description": "The installation source directory of the product.","name": "install_source","options": {},"type": "TEXT_TYPE"},
-     {"description": "The language of the product.","name": "language","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the product supplier.","name": "publisher","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path and filename of the uninstaller.","name": "uninstall_string","options": {},"type": "TEXT_TYPE"},
-     {"description": "Date that this product was installed on the system. ","name": "install_date","options": {},"type": "TEXT_TYPE"},
-     {"description": "Product identification such as a serial number on software, or a die number on a hardware chip.","name": "identifying_number","options": {},"type": "TEXT_TYPE"}
+     {"description": "The path scanned","name": "path","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "List of YARA matches","name": "matches","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Number of YARA matches","name": "count","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Signature group used","name": "sig_group","options": {"additional": true,"index": true},"type": "TEXT_TYPE"},
+     {"description": "Signature file used","name": "sigfile","options": {"additional": true,"index": true},"type": "TEXT_TYPE"},
+     {"description": "Matching strings","name": "strings","options": {},"type": "TEXT_TYPE"},
+     {"description": "Matching tags","name": "tags","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Rrepresents products as they are installed by Windows Installer. A product generally correlates to one installation package.",
+    "description": "Track YARA matches for files or PIDs.",
     "examples": [
-     "select * from programs"
+     "select * from yara where path = '/etc/passwd'",
+     "select * from yara where path LIKE '/etc/%'",
+     "select * from yara where path = '/etc/passwd' and sigfile = '/etc/osquery/yara/test.yara'"
     ],
     "foreign_keys": [],
-    "function": "genPrograms",
-    "name": "programs",
+    "function": "genYara",
+    "name": "yara",
     "profile": {}
    },
    {
-    "attributes": {},
+    "attributes": {
+     "event_subscriber": true
+    },
     "blacklisted": false,
     "columns": [
-     {"description": "The parent registry hive where the key and value exist","name": "hive","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the key to search for","name": "key","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the subkey for a given HIVE and key","name": "subkey","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the registry value entry","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Type of data associated with the registry value","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "Data content of registry value","name": "data","options": {},"type": "TEXT_TYPE"},
-     {"description": "timestamp of the most recent registry write","name": "mtime","options": {},"type": "BIGINT_TYPE"}
+     {"description": "The path scanned","name": "target_path","options": {},"type": "TEXT_TYPE"},
+     {"description": "The category of the file","name": "category","options": {},"type": "TEXT_TYPE"},
+     {"description": "Change action (UPDATE, REMOVE, etc)","name": "action","options": {},"type": "TEXT_TYPE"},
+     {"description": "ID used during bulk update","name": "transaction_id","options": {},"type": "BIGINT_TYPE"},
+     {"description": "List of YARA matches","name": "matches","options": {},"type": "TEXT_TYPE"},
+     {"description": "Number of YARA matches","name": "count","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Matching strings","name": "strings","options": {},"type": "TEXT_TYPE"},
+     {"description": "Matching tags","name": "tags","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time of the scan","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
-    "description": "All of the Windows registry hives.",
-    "examples": [
-     "select * from registry"
-    ],
+    "description": "Track YARA matches for files specified in configuration data.",
+    "examples": [],
     "foreign_keys": [],
-    "function": "genRegistry",
-    "name": "registry",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "A textual description of the object","name": "description","options": {},"type": "TEXT_TYPE"},
-     {"description": "Indicates when the object was installed. Lack of a value does not indicate that the object is not installed","name": "install_date","options": {},"type": "TEXT_TYPE"},
-     {"description": "String that indicates the current status of the object","name": "status","options": {},"type": "TEXT_TYPE"},
-     {"description": "Number of concurrent users for this resource has been limited. If True, the value in the MaximumAllowed property is ignored.","name": "allow_maximum","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Limit on the maximum number of users allowed to use this resource concurrently. The value is only valid if the AllowMaximum property is set to FALSE.","name": "maximum_allowed","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Alias given to a path set up as a share on a computer system running Windows.","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Local path of the Windows share.","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "Type of resource being shared. Types include: disk drives, print queues, interprocess communications (IPC), and general devices.","name": "type","options": {},"type": "INTEGER_TYPE"}
-    ],
-    "description": "Displays shared resources on a computer system running Windows. This may be a disk drive, printer, interprocess communication, or other sharable device.",
-    "examples": [
-     "select * from shared_resources"
-    ],
-    "foreign_keys": [],
-    "function": "genShares",
-    "name": "shared_resources",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Unique name of a consumer.","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Standard string template that specifies the process to be started. This property can be NULL, and the ExecutablePath property is used as the command line.","name": "command_line_template","options": {},"type": "TEXT_TYPE"},
-     {"description": "Module to execute. The string can specify the full path and file name of the module to execute, or it can specify a partial name. If a partial name is specified, the current drive and current directory are assumed.","name": "executable_path","options": {},"type": "TEXT_TYPE"},
-     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
-     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "WMI CommandLineEventConsumer, which can be used for persistance on Windows. https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf",
-    "examples": [
-     "select filter,consumer,query,command_line_template from wmi_filter_consumer_binding wcb join wmi_cli_event_consumers wcec on consumer = wcec.__relpath join wmi_event_filters wef on wef.__relpath = wcb.filter;"
-    ],
-    "foreign_keys": [],
-    "function": "genWmiCliConsumers",
-    "name": "wmi_cli_event_consumers",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Unique identifier of an event filter.","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Windows Management Instrumentation Query Language (WQL) event query that specifies the set of events for consumer notification, and the specific conditions for notification.","name": "query","options": {},"type": "TEXT_TYPE"},
-     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
-     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Lists WMI event filters",
-    "examples": [
-     "select * from wmi_event_filters"
-    ],
-    "foreign_keys": [],
-    "function": "genWmiFilters",
-    "name": "wmi_event_filters",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Reference to an instance of __EventConsumer that represents the object path to a logical consumer, the recipient of an event.","name": "consumer","options": {},"type": "TEXT_TYPE"},
-     {"description": "Reference to an instance of __EventFilter that represents the object path to an event filter which is a query that specifies the type of event to be received.","name": "filter","options": {},"type": "TEXT_TYPE"},
-     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
-     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Lists the relationship between event consumers and filters.",
-    "examples": [
-     "select * from wmi_filter_consumer_binding"
-    ],
-    "foreign_keys": [],
-    "function": "genFilterConsumer",
-    "name": "wmi_filter_consumer_binding",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Unique identifier for the event consumer. ","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the scripting engine to use, for example, 'VBScript'. This property cannot be NULL.","name": "scripting_engine","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the file from which the script text is read, intended as an alternative to specifying the text of the script in the ScriptText property.","name": "script_file_name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Text of the script that is expressed in a language known to the scripting engine. This property must be NULL if the ScriptFileName property is not NULL.","name": "script_text","options": {},"type": "TEXT_TYPE"},
-     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
-     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "WMI ActiveScriptEventConsumer, which can be used for persistance on Windows. https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf",
-    "examples": [
-     "select filter,consumer,query,scripting_engine,script_text from wmi_filter_consumer_binding wcb join wmi_script_event_consumers wsec on consumer = wsec.__relpath join wmi_event_filters wef on wef.__relpath = wcb.filter;"
-    ],
-    "foreign_keys": [],
-    "function": "genScriptConsumers",
-    "name": "wmi_script_event_consumers",
+    "function": "genTable",
+    "name": "yara_events",
     "profile": {}
    }
   ]
  },
  {
-  "key": "posix",
-  "name": "POSIX-compatible Plaforms",
+  "key": "sleuthkit",
+  "name": "The Sleuth Kit",
   "tables": [
    {
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "ACPI table name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Size of compiled table data","name": "size","options": {},"type": "INTEGER_TYPE"},
-     {"description": "MD5 hash of table content","name": "md5","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Firmware ACPI functional table common metadata and content.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genACPITables",
-    "name": "acpi_tables",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "IPv4 address target","name": "address","options": {},"type": "TEXT_TYPE"},
-     {"description": "MAC address of broadcasted address","name": "mac","options": {},"type": "TEXT_TYPE"},
-     {"description": "Interface of the network for the MAC","name": "interface","options": {},"type": "TEXT_TYPE"},
-     {"description": "1 for true, 0 for false","name": "permanent","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Address resolution cache, both static and dynamic (from ARP, NDP).",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genArpCache",
-    "name": "arp_cache",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "user_data": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "The local owner of authorized_keys file","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
-     {"description": "algorithim of key","name": "algorithm","options": {},"type": "TEXT_TYPE"},
-     {"description": "parsed authorized keys line","name": "key","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path to the authorized_keys file","name": "key_file","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "A line-delimited authorized_keys table.",
-    "examples": [],
-    "foreign_keys": [
-     {"column": "uid","table": "users"}
-    ],
-    "function": "getAuthorizedKeys",
-    "name": "authorized_keys",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Block device name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device parent name","name": "parent","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device vendor string","name": "vendor","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device model string identifier","name": "model","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device size in bytes","name": "size","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Block device Universally Unique Identifier","name": "uuid","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device type string","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "Block device label string","name": "label","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Block (buffered access) device file nodes: disks, ramdisks, and DMG containers.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genBlockDevs",
-    "name": "block_devices",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "user_data": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "The local user that owns the extension","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
-     {"description": "Extension display name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension identifier","name": "identifier","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension-supplied version","name": "version","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension-optional description","name": "description","options": {},"type": "TEXT_TYPE"},
-     {"description": "Default locale supported by extension","name": "locale","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension-supplied update URI","name": "update_url","options": {},"type": "TEXT_TYPE"},
-     {"description": "Optional extension author","name": "author","options": {},"type": "TEXT_TYPE"},
-     {"description": "1 If extension is persistent across all tabs else 0","name": "persistent","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Path to extension folder","name": "path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Chrome browser extensions.",
-    "examples": [],
-    "foreign_keys": [
-     {"column": "uid","table": "users"}
-    ],
-    "function": "genChromeExtensions",
-    "name": "chrome_extensions",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "cacheable": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "The job @event name (rare)","name": "event","options": {},"type": "TEXT_TYPE"},
-     {"description": "The exact minute for the job","name": "minute","options": {},"type": "TEXT_TYPE"},
-     {"description": "The hour of the day for the job","name": "hour","options": {},"type": "TEXT_TYPE"},
-     {"description": "The day of the month for the job","name": "day_of_month","options": {},"type": "TEXT_TYPE"},
-     {"description": "The month of the year for the job","name": "month","options": {},"type": "TEXT_TYPE"},
-     {"description": "The day of the week for the job","name": "day_of_week","options": {},"type": "TEXT_TYPE"},
-     {"description": "Raw command string","name": "command","options": {},"type": "TEXT_TYPE"},
-     {"description": "File parsed","name": "path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Line parsed values from system and user cron/tab.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genCronTab",
-    "name": "crontab",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Absolute file path to device node","name": "device","options": {"required": true},"type": "TEXT_TYPE"},
-     {"description": "A partition number","name": "partition","options": {"required": true},"type": "TEXT_TYPE"},
+     {"description": "Absolute file path to device node","name": "device","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "A partition number","name": "partition","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
      {"description": "A logical path within the device node","name": "path","options": {"additional": true},"type": "TEXT_TYPE"},
      {"description": "Name portion of file path","name": "filename","options": {},"type": "TEXT_TYPE"},
-     {"description": "Filesystem inode number","name": "inode","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Filesystem inode number","name": "inode","options": {"index": true},"type": "BIGINT_TYPE"},
      {"description": "Owning user ID","name": "uid","options": {},"type": "BIGINT_TYPE"},
      {"description": "Owning group ID","name": "gid","options": {},"type": "BIGINT_TYPE"},
      {"description": "Permission bits","name": "mode","options": {},"type": "TEXT_TYPE"},
@@ -334,6 +122,622 @@
     "function": "genDevicePartitions",
     "name": "device_partitions",
     "profile": {}
+   }
+  ]
+ },
+ {
+  "key": "macwin",
+  "name": "MacOS and Windows",
+  "tables": [
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Certificate CommonName","name": "common_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Certificate distinguished name","name": "subject","options": {},"type": "TEXT_TYPE"},
+     {"description": "Certificate issuer distinguished name","name": "issuer","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 if CA: true (certificate is an authority) else 0","name": "ca","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if self-signed, else 0","name": "self_signed","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Lower bound of valid date","name": "not_valid_before","options": {},"type": "TEXT_TYPE"},
+     {"description": "Certificate expiration data","name": "not_valid_after","options": {},"type": "TEXT_TYPE"},
+     {"description": "Signing algorithm used","name": "signing_algorithm","options": {},"type": "TEXT_TYPE"},
+     {"description": "Key algorithm used","name": "key_algorithm","options": {},"type": "TEXT_TYPE"},
+     {"description": "Key size used for RSA/DSA, or curve name","name": "key_strength","options": {},"type": "TEXT_TYPE"},
+     {"description": "Certificate key usage and extended key usage","name": "key_usage","options": {},"type": "TEXT_TYPE"},
+     {"description": "SKID an optionally included SHA1","name": "subject_key_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "AKID an optionally included SHA1","name": "authority_key_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "SHA1 hash of the raw certificate contents","name": "sha1","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path to Keychain or PEM bundle","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Certificate Authorities installed in Keychains/ca-bundles.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genCerts",
+    "name": "certificates",
+    "profile": {}
+   }
+  ]
+ },
+ {
+  "key": "windows",
+  "name": "Microsoft Windows",
+  "tables": [
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the executable that is being shimmed. This is pulled from the registry.","name": "executable","options": {},"type": "TEXT_TYPE"},
+     {"description": "This is the path to the SDB database.","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Description of the SDB.","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Install time of the SDB","name": "install_time","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Type of the SDB database.","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Unique GUID of the SDB.","name": "sdb_id","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Application Compatibility shims are a way to persist malware. This table presents the AppCompat Shim information from the registry in a nice format. See http://files.brucon.org/2015/Tomczak_and_Ballenthin_Shims_for_the_Win.pdf for more details.",
+    "examples": [
+     "select * from appcompat_shims;"
+    ],
+    "foreign_keys": [],
+    "function": "genShims",
+    "name": "appcompat_shims",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Path to the executable","name": "path","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Name of the program","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Source table of the autoexec item","name": "source","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Aggregate of executables that will automatically execute on the target machine. This is an amalgamation of other tables like services, scheduled tasks, startup_items and more.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genAutoexec",
+    "name": "autoexec",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Package display name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package-supplied version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package-supplied summary","name": "summary","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional package author","name": "author","options": {},"type": "TEXT_TYPE"},
+     {"description": "License under which package is launched","name": "license","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path at which this package resides","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Chocolatey packages installed in a system.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genChocolateyPackages",
+    "name": "chocolatey_packages",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Device ID","name": "device_id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Device name","name": "device_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path to driver image file","name": "image","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver description","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver service name, if one exists","name": "service","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver service registry key","name": "service_key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Associated inf file","name": "inf","options": {},"type": "TEXT_TYPE"},
+     {"description": "Device/driver class name","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver provider","name": "provider","options": {},"type": "TEXT_TYPE"},
+     {"description": "Device manufacturer","name": "manufacturer","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver key","name": "driver_key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver date","name": "date","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "Details for in-use Windows device drivers. This does not display installed but unused drivers.",
+    "examples": [
+     "select * from drivers"
+    ],
+    "foreign_keys": [],
+    "function": "genDrivers",
+    "name": "drivers",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Extension display name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension identifier","name": "registry_path","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Version of the executable","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path to executable","name": "path","options": {"index": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "Internet Explorer browser extensions.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genIEExtensions",
+    "name": "ie_extensions",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "The name of the host the patch is installed on.","name": "csname","options": {},"type": "TEXT_TYPE"},
+     {"description": "The KB ID of the patch.","name": "hotfix_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Short description of the patch.","name": "caption","options": {},"type": "TEXT_TYPE"},
+     {"description": "Fuller description of the patch.","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Additional comments about the patch.","name": "fix_comments","options": {},"type": "TEXT_TYPE"},
+     {"description": "The system context in which the patch as installed.","name": "installed_by","options": {},"type": "TEXT_TYPE"},
+     {"description": "Indicates when the patch was installed. Lack of a value does not indicate that the patch was not installed.","name": "install_date","options": {},"type": "TEXT_TYPE"},
+     {"description": "The date when the patch was installed.","name": "installed_on","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Lists all the patches applied. Note: This does not include patches applied via MSI or downloaded from Windows Update (e.g. Service Packs).",
+    "examples": [
+     "select * from patches"
+    ],
+    "foreign_keys": [],
+    "function": "genInstalledPatches",
+    "name": "patches",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Commonly used product name.","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Product version information.","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "The installation source directory of the product.","name": "install_source","options": {},"type": "TEXT_TYPE"},
+     {"description": "The language of the product.","name": "language","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the product supplier.","name": "publisher","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path and filename of the uninstaller.","name": "uninstall_string","options": {},"type": "TEXT_TYPE"},
+     {"description": "Date that this product was installed on the system. ","name": "install_date","options": {},"type": "TEXT_TYPE"},
+     {"description": "Product identification such as a serial number on software, or a die number on a hardware chip.","name": "identifying_number","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Rrepresents products as they are installed by Windows Installer. A product generally correlates to one installation package.",
+    "examples": [
+     "select * from programs"
+    ],
+    "foreign_keys": [],
+    "function": "genPrograms",
+    "name": "programs",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the key to search for","name": "key","options": {"additional": true},"type": "TEXT_TYPE"},
+     {"description": "Full path to the value","name": "path","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Name of the registry value entry","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Type of the registry value, or 'subkey' if item is a subkey","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Data content of registry value","name": "data","options": {},"type": "TEXT_TYPE"},
+     {"description": "timestamp of the most recent registry write","name": "mtime","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "All of the Windows registry hives.",
+    "examples": [
+     "select path, key, name from registry where key = 'HKEY_USERS'; -- get user SIDS. Note: path is key+name",
+     "select path from registry where key like 'HKEY_USERS\\.Default\\%'; -- a SQL wildcard match; will not recurse subkeys",
+     "select path from registry where key like 'HKEY_USERS\\.Default\\Software\\%%'; -- recursing query (compare with 1 %)",
+     "select path from registry where key like 'HKEY_LOCAL_MACHINE\\Software\\Micr%ft\\%' and type = 'subkey' LIMIT 10; -- midfix wildcard match",
+     "select name, type, data from registry where path like 'HKEY_USERS\\%\\Control Panel\\International\\User Profile\\Languages'; -- get users' current UI language. Note: osquery cannot reference HKEY_CURRENT_USER",
+     "select name, type, data from registry where path like 'HKEY_USERS\\%\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Wallpapers\\%';  -- list all of the desktop wallpapers",
+     "select name, type, data from registry where key like 'HKEY_USERS\\%\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Wallpapers'; -- same, but filtering by key instead of path"
+    ],
+    "foreign_keys": [],
+    "function": "genRegistry",
+    "name": "registry",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the scheduled task","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Actions executed by the scheduled task","name": "action","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path to the executable to be run","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Whether or not the scheduled task is enabled","name": "enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "State of the scheduled task","name": "state","options": {},"type": "TEXT_TYPE"},
+     {"description": "Whether or not the task is visible in the UI","name": "hidden","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Timestamp the task last ran","name": "last_run_time","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Timestamp the task is scheduled to run next","name": "next_run_time","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Exit status message of the last task run","name": "last_run_message","options": {},"type": "TEXT_TYPE"},
+     {"description": "Exit status code of the last task run","name": "last_run_code","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Lists all of the tasks in the Windows task scheduler.",
+    "examples": [
+     "select * from scheduled_tasks",
+     "select * from scheduled_tasks where hidden=1 and enabled=1"
+    ],
+    "foreign_keys": [],
+    "function": "genScheduledTasks",
+    "name": "scheduled_tasks",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Service name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Service Type: OWN_PROCESS, SHARE_PROCESS and maybe Interactive (can interact with the desktop)","name": "service_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Service Display name","name": "display_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Service Current status: STOPPED, START_PENDING, STOP_PENDING, RUNNING, CONTINUE_PENDING, PAUSE_PENDING, PAUSED","name": "status","options": {},"type": "TEXT_TYPE"},
+     {"description": "the Process ID of the service","name": "pid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Service start type: BOOT_START, SYSTEM_START, AUTO_START, DEMAND_START, DISABLED","name": "start_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "The error code that the service uses to report an error that occurs when it is starting or stopping","name": "win32_exit_code","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The service-specific error code that the service returns when an error occurs while the service is starting or stopping","name": "service_exit_code","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Path to Service Executable","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path to ServiceDll","name": "module_path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Service Description","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "The name of the account that the service process will be logged on as when it runs. This name can be of the form Domain\\UserName. If the account belongs to the built-in domain, the name can be of the form .\\UserName.","name": "user_account","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Lists all installed Windows services and their relevant data.",
+    "examples": [
+     "select * from services"
+    ],
+    "foreign_keys": [],
+    "function": "genServices",
+    "name": "services",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "A textual description of the object","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Indicates when the object was installed. Lack of a value does not indicate that the object is not installed.","name": "install_date","options": {},"type": "TEXT_TYPE"},
+     {"description": "String that indicates the current status of the object.","name": "status","options": {},"type": "TEXT_TYPE"},
+     {"description": "Number of concurrent users for this resource has been limited. If True, the value in the MaximumAllowed property is ignored.","name": "allow_maximum","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Limit on the maximum number of users allowed to use this resource concurrently. The value is only valid if the AllowMaximum property is set to FALSE.","name": "maximum_allowed","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Alias given to a path set up as a share on a computer system running Windows.","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Local path of the Windows share.","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Type of resource being shared. Types include: disk drives, print queues, interprocess communications (IPC), and general devices.","name": "type","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Displays shared resources on a computer system running Windows. This may be a disk drive, printer, interprocess communication, or other sharable device.",
+    "examples": [
+     "select * from shared_resources"
+    ],
+    "foreign_keys": [],
+    "function": "genShares",
+    "name": "shared_resources",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "event_subscriber": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Timestamp the event was received","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "System time at which the event occurred","name": "datetime","options": {},"type": "TEXT_TYPE"},
+     {"description": "Source or channel of the event","name": "source","options": {},"type": "TEXT_TYPE"},
+     {"description": "Provider name of the event","name": "provider_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Provider guid of the event","name": "provider_guid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Event ID of the event","name": "eventid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Task value associated with the event","name": "task","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The severity level associated with the event","name": "level","options": {},"type": "INTEGER_TYPE"},
+     {"description": "A bitmask of the keywords defined in the event","name": "keywords","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Data associated with the event","name": "data","options": {},"type": "TEXT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "Windows Event logs.",
+    "examples": [
+     "select * from windows_events where eventid=4104 and channel='Security'"
+    ],
+    "foreign_keys": [],
+    "function": "genTable",
+    "name": "windows_events",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Unique name of a consumer.","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Standard string template that specifies the process to be started. This property can be NULL, and the ExecutablePath property is used as the command line.","name": "command_line_template","options": {},"type": "TEXT_TYPE"},
+     {"description": "Module to execute. The string can specify the full path and file name of the module to execute, or it can specify a partial name. If a partial name is specified, the current drive and current directory are assumed.","name": "executable_path","options": {},"type": "TEXT_TYPE"},
+     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "WMI CommandLineEventConsumer, which can be used for persistance on Windows. See https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf for more details.",
+    "examples": [
+     "select filter,consumer,query,command_line_template,wcec.name from wmi_cli_event_consumers wcec left outer join wmi_filter_consumer_binding wcb on consumer = wcec.relative_path left outer join wmi_event_filters wef on wef.relative_path = wcb.filter;"
+    ],
+    "foreign_keys": [],
+    "function": "genWmiCliConsumers",
+    "name": "wmi_cli_event_consumers",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Unique identifier of an event filter.","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Windows Management Instrumentation Query Language (WQL) event query that specifies the set of events for consumer notification, and the specific conditions for notification.","name": "query","options": {},"type": "TEXT_TYPE"},
+     {"description": "Query language that the query is written in.","name": "query_language","options": {},"type": "TEXT_TYPE"},
+     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Lists WMI event filters.",
+    "examples": [
+     "select * from wmi_event_filters"
+    ],
+    "foreign_keys": [],
+    "function": "genWmiFilters",
+    "name": "wmi_event_filters",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Reference to an instance of __EventConsumer that represents the object path to a logical consumer, the recipient of an event.","name": "consumer","options": {},"type": "TEXT_TYPE"},
+     {"description": "Reference to an instance of __EventFilter that represents the object path to an event filter which is a query that specifies the type of event to be received.","name": "filter","options": {},"type": "TEXT_TYPE"},
+     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Lists the relationship between event consumers and filters.",
+    "examples": [
+     "select * from wmi_filter_consumer_binding"
+    ],
+    "foreign_keys": [],
+    "function": "genFilterConsumer",
+    "name": "wmi_filter_consumer_binding",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Unique identifier for the event consumer. ","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the scripting engine to use, for example, 'VBScript'. This property cannot be NULL.","name": "scripting_engine","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the file from which the script text is read, intended as an alternative to specifying the text of the script in the ScriptText property.","name": "script_file_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Text of the script that is expressed in a language known to the scripting engine. This property must be NULL if the ScriptFileName property is not NULL.","name": "script_text","options": {},"type": "TEXT_TYPE"},
+     {"description": "The name of the class.","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Relative path to the class or instance.","name": "relative_path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "WMI ActiveScriptEventConsumer, which can be used for persistance on Windows. See https://www.blackhat.com/docs/us-15/materials/us-15-Graeber-Abusing-Windows-Management-Instrumentation-WMI-To-Build-A-Persistent%20Asynchronous-And-Fileless-Backdoor-wp.pdf for more details.",
+    "examples": [
+     "select filter,consumer,query,scripting_engine,script_file_name,script_text,wsec.name from wmi_script_event_consumers wsec left outer join wmi_filter_consumer_binding wcb on consumer = wsec.relative_path left outer join wmi_event_filters wef on wef.relative_path = wcb.filter;"
+    ],
+    "foreign_keys": [],
+    "function": "genScriptConsumers",
+    "name": "wmi_script_event_consumers",
+    "profile": {}
+   }
+  ]
+ },
+ {
+  "key": "lldpd",
+  "name": "LLDPD",
+  "tables": [
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Interface name","name": "interface","options": {},"type": "TEXT_TYPE"},
+     {"description": "Neighbor chassis index","name": "rid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Neighbor chassis ID type","name": "chassis_id_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Neighbor chassis ID value","name": "chassis_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "CPU brand string, contains vendor and model","name": "chassis_sysname","options": {},"type": "TEXT_TYPE"},
+     {"description": "Max number of CPU physical cores","name": "chassis_sys_description","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis bridge capability availability","name": "chassis_bridge_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is chassis bridge capability enabled.","name": "chassis_bridge_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis router capability availability","name": "chassis_router_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis router capability enabled","name": "chassis_router_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis repeater capability availability","name": "chassis_repeater_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis repeater capability enabled","name": "chassis_repeater_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis wlan capability availability","name": "chassis_wlan_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis wlan capability enabled","name": "chassis_wlan_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis telephone capability availability","name": "chassis_tel_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis telephone capability enabled","name": "chassis_tel_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis DOCSIS capability availability","name": "chassis_docsis_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis DOCSIS capability enabled","name": "chassis_docsis_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis station capability availability","name": "chassis_station_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis station capability enabled","name": "chassis_station_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis other capability availability","name": "chassis_other_capability_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Chassis other capability enabled","name": "chassis_other_capability_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Comma delimited list of chassis management IPS","name": "chassis_mgmt_ips","options": {},"type": "TEXT_TYPE"},
+     {"description": "Port ID type","name": "port_id_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Port ID value","name": "port_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Port description","name": "port_description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Age of neighbor port","name": "port_ttl","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Port max frame size","name": "port_mfs","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Port aggregation ID","name": "port_aggregation_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Auto negotiation supported","name": "port_autoneg_supported","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is auto negotiation enabled","name": "port_autoneg_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "MAU type","name": "port_mau_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "10Base-T HD auto negotiation enabled","name": "port_autoneg_10baset_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "10Base-T FD auto negotiation enabled","name": "port_autoneg_10baset_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-TX HD auto negotiation enabled","name": "port_autoneg_100basetx_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-TX FD auto negotiation enabled","name": "port_autoneg_100basetx_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-T2 HD auto negotiation enabled","name": "port_autoneg_100baset2_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-T2 FD auto negotiation enabled","name": "port_autoneg_100baset2_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-T4 HD auto negotiation enabled","name": "port_autoneg_100baset4_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "100Base-T4 FD auto negotiation enabled","name": "port_autoneg_100baset4_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1000Base-X HD auto negotiation enabled","name": "port_autoneg_1000basex_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1000Base-X FD auto negotiation enabled","name": "port_autoneg_1000basex_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1000Base-T HD auto negotiation enabled","name": "port_autoneg_1000baset_hd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1000Base-T FD auto negotiation enabled","name": "port_autoneg_1000baset_fd_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Dot3 power device type","name": "power_device_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "MDI power supported","name": "power_mdi_supported","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MDI power enabled","name": "power_mdi_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is power pair control enabled","name": "power_paircontrol_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Dot3 power pairs","name": "power_pairs","options": {},"type": "TEXT_TYPE"},
+     {"description": "Power class","name": "power_class","options": {},"type": "TEXT_TYPE"},
+     {"description": "Is 802.3at enabled","name": "power_8023at_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "802.3at power type","name": "power_8023at_power_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "802.3at power source","name": "power_8023at_power_source","options": {},"type": "TEXT_TYPE"},
+     {"description": "802.3at power priority","name": "power_8023at_power_priority","options": {},"type": "TEXT_TYPE"},
+     {"description": "802.3at power allocated","name": "power_8023at_power_allocated","options": {},"type": "TEXT_TYPE"},
+     {"description": "802.3at power requested","name": "power_8023at_power_requested","options": {},"type": "TEXT_TYPE"},
+     {"description": "Chassis MED type","name": "med_device_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Is MED capabilities enabled","name": "med_capability_capabilities","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MED policy capability enabled","name": "med_capability_policy","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MED location capability enabled","name": "med_capability_location","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MED MDI PSE capability enabled","name": "med_capability_mdi_pse","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MED MDI PD capability enabled","name": "med_capability_mdi_pd","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Is MED inventory capability enabled","name": "med_capability_inventory","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Comma delimited list of MED policies","name": "med_policies","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma delimited list of vlan ids","name": "vlans","options": {},"type": "TEXT_TYPE"},
+     {"description": "Primary VLAN id","name": "pvid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma delimited list of supported PPVIDs","name": "ppvids_supported","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma delimited list of enabled PPVIDs","name": "ppvids_enabled","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma delimited list of PIDs","name": "pids","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "LLDP neighbors of interfaces.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genLLDPNeighbors",
+    "name": "lldp_neighbors",
+    "profile": {}
+   }
+  ]
+ },
+ {
+  "key": "posix",
+  "name": "POSIX-compatible Plaforms",
+  "tables": [
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "ACPI table name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Size of compiled table data","name": "size","options": {},"type": "INTEGER_TYPE"},
+     {"description": "MD5 hash of table content","name": "md5","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Firmware ACPI functional table common metadata and content.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genACPITables",
+    "name": "acpi_tables",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "The node path of the configuration item","name": "node","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "The value of the configuration item","name": "value","options": {},"type": "TEXT_TYPE"},
+     {"description": "The label of the configuration item","name": "label","options": {},"type": "TEXT_TYPE"},
+     {"description": "The path to the configuration file","name": "path","options": {"additional": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "Configuration files parsed by augeas.",
+    "examples": [
+     "select * from augeas where path = '/etc/hosts'"
+    ],
+    "foreign_keys": [],
+    "function": "genAugeas",
+    "name": "augeas",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "user_data": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "The local owner of authorized_keys file","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
+     {"description": "algorithim of key","name": "algorithm","options": {},"type": "TEXT_TYPE"},
+     {"description": "parsed authorized keys line","name": "key","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Path to the authorized_keys file","name": "key_file","options": {"index": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "A line-delimited authorized_keys table.",
+    "examples": [],
+    "foreign_keys": [
+     {"column": "uid","table": "users"}
+    ],
+    "function": "getAuthorizedKeys",
+    "name": "authorized_keys",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Block device name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device parent name","name": "parent","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device vendor string","name": "vendor","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device model string identifier","name": "model","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device size in blocks","name": "size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Block size in bytes","name": "block_size","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Block device Universally Unique Identifier","name": "uuid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device type string","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Block device label string","name": "label","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Block (buffered access) device file nodes: disks, ramdisks, and DMG containers.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genBlockDevs",
+    "name": "block_devices",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the cpu (core)","name": "core","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Time spent in user mode","name": "user","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent in user mode with low priority (nice)","name": "nice","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent in system mode","name": "system","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent in the idle task","name": "idle","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent waiting for I/O to complete","name": "iowait","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent servicing interrupts","name": "irq","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent servicing softirqs","name": "softirq","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent in other operating systems when running in a virtualized environment","name": "steal","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent running a virtual CPU for a guest OS under the control of the Linux kernel","name": "guest","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time spent running a niced guest ","name": "guest_nice","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "Displays information from /proc/stat file about the time the cpu cores spent in different parts of the system.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genCpuTime",
+    "name": "cpu_time",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "The job @event name (rare)","name": "event","options": {},"type": "TEXT_TYPE"},
+     {"description": "The exact minute for the job","name": "minute","options": {},"type": "TEXT_TYPE"},
+     {"description": "The hour of the day for the job","name": "hour","options": {},"type": "TEXT_TYPE"},
+     {"description": "The day of the month for the job","name": "day_of_month","options": {},"type": "TEXT_TYPE"},
+     {"description": "The month of the year for the job","name": "month","options": {},"type": "TEXT_TYPE"},
+     {"description": "The day of the week for the job","name": "day_of_week","options": {},"type": "TEXT_TYPE"},
+     {"description": "Raw command string","name": "command","options": {},"type": "TEXT_TYPE"},
+     {"description": "File parsed","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Line parsed values from system and user cron/tab.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genCronTab",
+    "name": "crontab",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "The url for the request","name": "url","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "The HTTP method for the request","name": "method","options": {},"type": "TEXT_TYPE"},
+     {"description": "The user-agent string to use for the request","name": "user_agent","options": {},"type": "TEXT_TYPE"},
+     {"description": "The HTTP status code for the response","name": "response_code","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Time taken to complete the request","name": "round_trip_time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Number of bytes in the response","name": "bytes","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The HTTP response body","name": "result","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Perform an http request and return stats about it.",
+    "examples": [
+     "select url, round_trip_time, response_code from curl where url = 'https://github.com/facebook/osquery'"
+    ],
+    "foreign_keys": [],
+    "function": "genCurl",
+    "name": "curl",
+    "profile": {}
    },
    {
     "attributes": {},
@@ -346,7 +750,7 @@
      {"description": "Currently authenticated user if available (Apple)","name": "uid","options": {},"type": "TEXT_TYPE"},
      {"description": "UUID of authenticated user if available (Apple)","name": "user_uuid","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Disk Encryption",
+    "description": "Disk encryption status and information.",
     "examples": [],
     "foreign_keys": [
      {"column": "name","table": "block_devices"},
@@ -366,7 +770,7 @@
      {"description": "Address (sortlist) netmask length","name": "netmask","options": {},"type": "TEXT_TYPE"},
      {"description": "Resolver options","name": "options","options": {},"type": "BIGINT_TYPE"}
     ],
-    "description": "Resolvers used by this host",
+    "description": "Resolvers used by this host.",
     "examples": [],
     "foreign_keys": [],
     "function": "genDNSResolvers",
@@ -374,21 +778,234 @@
     "profile": {}
    },
    {
-    "attributes": {
-     "cacheable": true
-    },
+    "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Protocol name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Protocol number","name": "number","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Protocol alias","name": "alias","options": {},"type": "TEXT_TYPE"},
-     {"description": "Comment with protocol description","name": "comment","options": {},"type": "TEXT_TYPE"}
+     {"description": "Container ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Label key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional label value","name": "value","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Line-parsed /etc/protocols.",
-    "examples": [],
+    "description": "Docker container labels.",
+    "examples": [
+     "select * from docker_container_labels",
+     "select * from docker_container_labels where id = '1234567890abcdef'",
+     "select * from docker_container_labels where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
     "foreign_keys": [],
-    "function": "genEtcProtocols",
-    "name": "etc_protocols",
+    "function": "genContainerLabels",
+    "name": "docker_container_labels",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Type of mount (bind, volume)","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional mount name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Source path on host","name": "source","options": {},"type": "TEXT_TYPE"},
+     {"description": "Destination path inside container","name": "destination","options": {},"type": "TEXT_TYPE"},
+     {"description": "Driver providing the mount","name": "driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "Mount options (rw, ro)","name": "mode","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 if read/write. 0 otherwise","name": "rw","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Mount propagation","name": "propagation","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker container mounts.",
+    "examples": [
+     "select * from docker_container_mounts",
+     "select * from docker_container_mounts where id = '1234567890abcdef'",
+     "select * from docker_container_mounts where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainerMounts",
+    "name": "docker_container_mounts",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Network name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Network ID","name": "network_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Endpoint ID","name": "endpoint_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Gateway","name": "gateway","options": {},"type": "TEXT_TYPE"},
+     {"description": "IP address","name": "ip_address","options": {},"type": "TEXT_TYPE"},
+     {"description": "IP subnet prefix length","name": "ip_prefix_len","options": {},"type": "INTEGER_TYPE"},
+     {"description": "IPv6 gateway","name": "ipv6_gateway","options": {},"type": "TEXT_TYPE"},
+     {"description": "IPv6 address","name": "ipv6_address","options": {},"type": "TEXT_TYPE"},
+     {"description": "IPv6 subnet prefix length","name": "ipv6_prefix_len","options": {},"type": "INTEGER_TYPE"},
+     {"description": "MAC address","name": "mac_address","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker container networks.",
+    "examples": [
+     "select * from docker_container_networks",
+     "select * from docker_container_networks where id = '1234567890abcdef'",
+     "select * from docker_container_networks where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainerNetworks",
+    "name": "docker_container_networks",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Protocol (tcp, udp)","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Port inside the container","name": "port","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Host IP address on which public port is listening","name": "host_ip","options": {},"type": "TEXT_TYPE"},
+     {"description": "Host port","name": "host_port","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Docker container ports.",
+    "examples": [
+     "select * from docker_container_ports",
+     "select * from docker_container_ports where id = '1234567890abcdef'",
+     "select * from docker_container_ports where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainerPorts",
+    "name": "docker_container_ports",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "Process ID","name": "pid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The process path or shorthand argv[0]","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Complete argv","name": "cmdline","options": {},"type": "TEXT_TYPE"},
+     {"description": "Process state","name": "state","options": {},"type": "TEXT_TYPE"},
+     {"description": "User ID","name": "uid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Group ID","name": "gid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Effective user ID","name": "euid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Effective group ID","name": "egid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Saved user ID","name": "suid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Saved group ID","name": "sgid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Bytes of unpagable memory used by process","name": "wired_size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Bytes of private memory used by process","name": "resident_size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total virtual memory size","name": "total_size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Process start in seconds since boot (non-sleeping)","name": "start_time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Process parent's PID","name": "parent","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Process group","name": "pgroup","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Number of threads used by process","name": "threads","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Process nice level (-20 to 20, default 0)","name": "nice","options": {},"type": "INTEGER_TYPE"},
+     {"description": "User name","name": "user","options": {},"type": "TEXT_TYPE"},
+     {"description": "Cumulative CPU time. [DD-]HH:MM:SS format","name": "time","options": {},"type": "TEXT_TYPE"},
+     {"description": "CPU utilization as percentage","name": "cpu","options": {},"type": "DOUBLE_TYPE"},
+     {"description": "Memory utilization as percentage","name": "mem","options": {},"type": "DOUBLE_TYPE"}
+    ],
+    "description": "Docker container processes.",
+    "examples": [
+     "select * from docker_container_processes where id = '1234567890abcdef'",
+     "select * from docker_container_processes where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainerProcesses",
+    "name": "docker_container_processes",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "Container name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Number of processes","name": "pids","options": {},"type": "INTEGER_TYPE"},
+     {"description": "UNIX time when stats were read","name": "read","options": {},"type": "BIGINT_TYPE"},
+     {"description": "UNIX time when stats were last read","name": "preread","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Difference between read and preread in nano-seconds","name": "interval","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total disk read bytes","name": "disk_read","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total disk write bytes","name": "disk_write","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Number of processors","name": "num_procs","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Total CPU usage","name": "cpu_total_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "CPU kernel mode usage","name": "cpu_kernelmode_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "CPU user mode usage","name": "cpu_usermode_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "CPU system usage","name": "system_cpu_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Online CPUs","name": "online_cpus","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Last read total CPU usage","name": "pre_cpu_total_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Last read CPU kernel mode usage","name": "pre_cpu_kernelmode_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Last read CPU user mode usage","name": "pre_cpu_usermode_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Last read CPU system usage","name": "pre_system_cpu_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Last read online CPUs","name": "pre_online_cpus","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Memory usage","name": "memory_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Memory maximum usage","name": "memory_max_usage","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Memory limit","name": "memory_limit","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total network bytes read","name": "network_rx_bytes","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total network bytes transmitted","name": "network_tx_bytes","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "Docker container statistics. Queries on this table take at least one second.",
+    "examples": [
+     "select * from docker_container_stats where id = 'de8cfdc74c850967'",
+     "select * from docker_container_stats where id = 'de8cfdc74c850967fd3832e128f4d12e2d5476a4aea282734bfb7e57f66fce2f'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainerStats",
+    "name": "docker_container_stats",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Container ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Container name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Docker image (name) used to launch this container","name": "image","options": {},"type": "TEXT_TYPE"},
+     {"description": "Docker image ID","name": "image_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Command with arguments","name": "command","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time of creation as UNIX time","name": "created","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Container state (created, restarting, running, removing, paused, exited, dead)","name": "state","options": {},"type": "TEXT_TYPE"},
+     {"description": "Container status information","name": "status","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker containers information.",
+    "examples": [
+     "select * from docker_containers where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'",
+     "select * from docker_containers where name = '/hello'"
+    ],
+    "foreign_keys": [],
+    "function": "genContainers",
+    "name": "docker_containers",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Image ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Label key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional label value","name": "value","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker image labels.",
+    "examples": [
+     "select * from docker_image_labels",
+     "select * from docker_image_labels where id = '1234567890abcdef'",
+     "select * from docker_image_labels where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genImageLabels",
+    "name": "docker_image_labels",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Image ID","name": "id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time of creation as UNIX time","name": "created","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Size of image in bytes","name": "size_bytes","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Comma-separated list of repository tags","name": "tags","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker images information.",
+    "examples": [
+     "select * from docker_images",
+     "select * from docker_images where id = '6a2f32de169d'",
+     "select * from docker_images where id = '6a2f32de169d14e6f8a84538eaa28f2629872d7d4f580a303b296c60db36fbd7'"
+    ],
+    "foreign_keys": [],
+    "function": "genImages",
+    "name": "docker_images",
     "profile": {}
    },
    {
@@ -397,17 +1014,150 @@
     },
     "blacklisted": false,
     "columns": [
-     {"description": "Service name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Service port number","name": "port","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "TEXT_TYPE"},
-     {"description": "Optional space separated list of other names for a service","name": "aliases","options": {},"type": "TEXT_TYPE"},
-     {"description": "Optional comment for a service.","name": "comment","options": {},"type": "TEXT_TYPE"}
+     {"description": "Docker system ID","name": "id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Total number of containers","name": "containers","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of containers currently running","name": "containers_running","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of containers in paused state","name": "containers_paused","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of containers in stopped state","name": "containers_stopped","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of images","name": "images","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Storage driver","name": "storage_driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 if memory limit support is enabled. 0 otherwise","name": "memory_limit","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if swap limit support is enabled. 0 otherwise","name": "swap_limit","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if kernel memory limit support is enabled. 0 otherwise","name": "kernel_memory","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if CPU Completely Fair Scheduler (CFS) period support is enabled. 0 otherwise","name": "cpu_cfs_period","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if CPU Completely Fair Scheduler (CFS) quota support is enabled. 0 otherwise","name": "cpu_cfs_quota","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if CPU share weighting support is enabled. 0 otherwise","name": "cpu_shares","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if CPU set selection support is enabled. 0 otherwise","name": "cpu_set","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if IPv4 forwarding is enabled. 0 otherwise","name": "ipv4_forwarding","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if bridge netfilter iptables is enabled. 0 otherwise","name": "bridge_nf_iptables","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if bridge netfilter ip6tables is enabled. 0 otherwise","name": "bridge_nf_ip6tables","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if Out-of-memory kill is disabled. 0 otherwise","name": "oom_kill_disable","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Logging driver","name": "logging_driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "Control groups driver","name": "cgroup_driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "Kernel version","name": "kernel_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Operating system","name": "os","options": {},"type": "TEXT_TYPE"},
+     {"description": "Operating system type","name": "os_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Hardware architecture","name": "architecture","options": {},"type": "TEXT_TYPE"},
+     {"description": "Number of CPUs","name": "cpus","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Total memory","name": "memory","options": {},"type": "BIGINT_TYPE"},
+     {"description": "HTTP proxy","name": "http_proxy","options": {},"type": "TEXT_TYPE"},
+     {"description": "HTTPS proxy","name": "https_proxy","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma-separated list of domain extensions proxy should not be used for","name": "no_proxy","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the docker host","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Server version","name": "server_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Docker root directory","name": "root_dir","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Line-parsed /etc/services.",
-    "examples": [],
+    "description": "Docker system information.",
+    "examples": [
+     "select * from docker_info"
+    ],
     "foreign_keys": [],
-    "function": "genEtcServices",
-    "name": "etc_services",
+    "function": "genInfo",
+    "name": "docker_info",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Network ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Label key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional label value","name": "value","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker network labels.",
+    "examples": [
+     "select * from docker_network_labels",
+     "select * from docker_network_labels where id = '1234567890abcdef'",
+     "select * from docker_network_labels where id = '11b2399e1426d906e62a0c357650e363426d6c56dbe2f35cbaa9b452250e3355'"
+    ],
+    "foreign_keys": [],
+    "function": "genNetworkLabels",
+    "name": "docker_network_labels",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Network ID","name": "id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Network name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Network driver","name": "driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time of creation as UNIX time","name": "created","options": {},"type": "BIGINT_TYPE"},
+     {"description": "1 if IPv6 is enabled on this network. 0 otherwise","name": "enable_ipv6","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Network subnet","name": "subnet","options": {},"type": "TEXT_TYPE"},
+     {"description": "Network gateway","name": "gateway","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker networks information.",
+    "examples": [
+     "select * from docker_networks",
+     "select * from docker_networks where id = 'cfd2ffd49439'",
+     "select * from docker_networks where id = 'cfd2ffd494395b75d77539761df40cde06a2b6b497e0c9c1adc6c5a79539bfad'"
+    ],
+    "foreign_keys": [],
+    "function": "genNetworks",
+    "name": "docker_networks",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Docker version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "API version","name": "api_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Minimum API version supported","name": "min_api_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Docker build git commit","name": "git_commit","options": {},"type": "TEXT_TYPE"},
+     {"description": "Go version","name": "go_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Operating system","name": "os","options": {},"type": "TEXT_TYPE"},
+     {"description": "Hardware architecture","name": "arch","options": {},"type": "TEXT_TYPE"},
+     {"description": "Kernel version","name": "kernel_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Build time","name": "build_time","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker version information.",
+    "examples": [
+     "select version from docker_version"
+    ],
+    "foreign_keys": [],
+    "function": "genVersion",
+    "name": "docker_version",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Volume name","name": "name","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Label key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional label value","name": "value","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker volume labels.",
+    "examples": [
+     "select * from docker_volume_labels",
+     "select * from docker_volume_labels where name = 'btrfs'"
+    ],
+    "foreign_keys": [],
+    "function": "genVolumeLabels",
+    "name": "docker_volume_labels",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Volume name","name": "name","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Volume driver","name": "driver","options": {},"type": "TEXT_TYPE"},
+     {"description": "Mount point","name": "mount_point","options": {},"type": "TEXT_TYPE"},
+     {"description": "Volume type","name": "type","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Docker volumes information.",
+    "examples": [
+     "select * from docker_volumes",
+     "select * from docker_volumes where name = 'btrfs'"
+    ],
+    "foreign_keys": [],
+    "function": "genVolumes",
+    "name": "docker_volumes",
     "profile": {}
    },
    {
@@ -432,7 +1182,8 @@
      {"description": "The SHA1 of the file after change","name": "sha1","options": {},"type": "TEXT_TYPE"},
      {"description": "The SHA256 of the file after change","name": "sha256","options": {},"type": "TEXT_TYPE"},
      {"description": "1 if the file was hashed, 0 if not, -1 if hashing failed","name": "hashed","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Time of file event","name": "time","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of file event","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Track time/action changes to files specified in configuration data.",
     "examples": [],
@@ -449,7 +1200,7 @@
     "columns": [
      {"description": "The local user that owns the addon","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
      {"description": "Addon display name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Addon identifier","name": "identifier","options": {},"type": "TEXT_TYPE"},
+     {"description": "Addon identifier","name": "identifier","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Addon-supported creator string","name": "creator","options": {},"type": "TEXT_TYPE"},
      {"description": "Extension, addon, webapp","name": "type","options": {},"type": "TEXT_TYPE"},
      {"description": "Addon-supplied version string","name": "version","options": {},"type": "TEXT_TYPE"},
@@ -505,7 +1256,8 @@
      {"description": "Hex encoded Hardware model identifier","name": "model_id","options": {},"type": "TEXT_TYPE"},
      {"description": "Device serial (optional)","name": "serial","options": {},"type": "TEXT_TYPE"},
      {"description": "Device revision (optional)","name": "revision","options": {},"type": "TEXT_TYPE"},
-     {"description": "Time of hardware event","name": "time","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of hardware event","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Hardware (PCI/USB/HID) events from UDEV or IOKit.",
     "examples": [],
@@ -516,31 +1268,13 @@
    },
    {
     "attributes": {
-     "cacheable": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "Kernel version","name": "version","options": {},"type": "TEXT_TYPE"},
-     {"description": "Kernel arguments","name": "arguments","options": {},"type": "TEXT_TYPE"},
-     {"description": "Kernel path","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "Kernel device identifier","name": "device","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Basic active kernel information.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genKernelInfo",
-    "name": "kernel_info",
-    "profile": {}
-   },
-   {
-    "attributes": {
      "user_data": true
     },
     "blacklisted": false,
     "columns": [
      {"description": "The local user that owns the known_hosts file","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
-     {"description": "parsed authorized keys line","name": "key","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path to known_hosts file","name": "key_file","options": {},"type": "TEXT_TYPE"}
+     {"description": "parsed authorized keys line","name": "key","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Path to known_hosts file","name": "key_file","options": {"index": true},"type": "TEXT_TYPE"}
     ],
     "description": "A line-delimited known_hosts table.",
     "examples": [],
@@ -572,42 +1306,19 @@
     "profile": {}
    },
    {
-    "attributes": {
-     "cacheable": true
-    },
+    "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Transport layer port","name": "port","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Network protocol (IPv4, IPv6)","name": "family","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Specific address for bind","name": "address","options": {},"type": "TEXT_TYPE"}
+     {"description": "Period over which the average is calculated.","name": "period","options": {},"type": "TEXT_TYPE"},
+     {"description": "Load average over the specified period.","name": "average","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Processes with listening (bound) network sockets/ports.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genListeningPorts",
-    "name": "listening_ports",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "cacheable": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "Login type","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "User login name","name": "user","options": {},"type": "TEXT_TYPE"},
-     {"description": "Device name","name": "tty","options": {},"type": "TEXT_TYPE"},
-     {"description": "Remote hostname","name": "host","options": {},"type": "TEXT_TYPE"},
-     {"description": "Time entry was made","name": "time","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "INTEGER_TYPE"}
+    "description": "Displays information about the system wide load averages.",
+    "examples": [
+     "select * from load_average;"
     ],
-    "description": "Users with an active shell on the system.",
-    "examples": [],
     "foreign_keys": [],
-    "function": "genLoggedInUsers",
-    "name": "logged_in_users",
+    "function": "genLoadAverage",
+    "name": "load_average",
     "profile": {}
    },
    {
@@ -657,7 +1368,7 @@
     "columns": [
      {"description": "The local user that owns the extension","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
      {"description": "Extension display name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension identifier","name": "identifier","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension identifier","name": "identifier","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Extension-supplied version","name": "version","options": {},"type": "TEXT_TYPE"},
      {"description": "Extension-optional description","name": "description","options": {},"type": "TEXT_TYPE"},
      {"description": "Default locale supported by extension","name": "locale","options": {},"type": "TEXT_TYPE"},
@@ -679,23 +1390,6 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Distribution or product name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Major release version","name": "major","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Minor release version","name": "minor","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Optional patch release","name": "patch","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Optional build-specific or variant string","name": "build","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "A single row containing the operating system name and version.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genOSVersion",
-    "name": "os_version",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
      {"description": "PCI Device used slot","name": "pci_slot","options": {},"type": "TEXT_TYPE"},
      {"description": "PCI Device class","name": "pci_class","options": {},"type": "TEXT_TYPE"},
      {"description": "PCI Device used driver","name": "driver","options": {},"type": "TEXT_TYPE"},
@@ -709,26 +1403,6 @@
     "foreign_keys": [],
     "function": "genPCIDevices",
     "name": "pci_devices",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Platform code vendor","name": "vendor","options": {},"type": "TEXT_TYPE"},
-     {"description": "Platform code version","name": "version","options": {},"type": "TEXT_TYPE"},
-     {"description": "Self-reported platform code update date","name": "date","options": {},"type": "TEXT_TYPE"},
-     {"description": "BIOS major and minor revision","name": "revision","options": {},"type": "TEXT_TYPE"},
-     {"description": "Relative address of firmware mapping","name": "address","options": {},"type": "TEXT_TYPE"},
-     {"description": "Size in bytes of firmware","name": "size","options": {},"type": "TEXT_TYPE"},
-     {"description": "(Optional) size of firmware volume","name": "volume_size","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Platform-specific additional information","name": "extra","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Information about EFI/UEFI/ROM and platform/boot.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genPlatformInfo",
-    "name": "platform_info",
     "profile": {}
    },
    {
@@ -759,10 +1433,12 @@
      {"description": "Path of executed file","name": "path","options": {},"type": "TEXT_TYPE"},
      {"description": "File mode permissions","name": "mode","options": {},"type": "BIGINT_TYPE"},
      {"description": "Command line arguments (argv)","name": "cmdline","options": {},"type": "TEXT_TYPE"},
-     {"description": "Actual size (bytes) of command line arguments","name": "cmdline_size","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Environment variables delimited by spaces","name": "env","options": {},"type": "TEXT_TYPE"},
-     {"description": "Number of environment variables","name": "env_count","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Actual size (bytes) of environment list","name": "env_size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Actual size (bytes) of command line arguments","name": "cmdline_size","options": {"hidden": true},"type": "BIGINT_TYPE"},
+     {"description": "Environment variables delimited by spaces","name": "env","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Number of environment variables","name": "env_count","options": {"hidden": true},"type": "BIGINT_TYPE"},
+     {"description": "Actual size (bytes) of environment list","name": "env_size","options": {"hidden": true},"type": "BIGINT_TYPE"},
+     {"description": "The process current working directory","name": "cwd","options": {},"type": "TEXT_TYPE"},
+     {"description": "Audit User ID at process start","name": "auid","options": {},"type": "BIGINT_TYPE"},
      {"description": "User ID at process start","name": "uid","options": {},"type": "BIGINT_TYPE"},
      {"description": "Effective user ID at process start","name": "euid","options": {},"type": "BIGINT_TYPE"},
      {"description": "Group ID at process start","name": "gid","options": {},"type": "BIGINT_TYPE"},
@@ -773,39 +1449,18 @@
      {"description": "File modification in UNIX time","name": "mtime","options": {},"type": "BIGINT_TYPE"},
      {"description": "File last metadata change in UNIX time","name": "ctime","options": {},"type": "BIGINT_TYPE"},
      {"description": "File creation in UNIX time","name": "btime","options": {},"type": "BIGINT_TYPE"},
-     {"description": "List of structures that overflowed","name": "overflows","options": {},"type": "TEXT_TYPE"},
+     {"description": "List of structures that overflowed","name": "overflows","options": {"hidden": true},"type": "TEXT_TYPE"},
      {"description": "Process parent's PID","name": "parent","options": {},"type": "BIGINT_TYPE"},
      {"description": "Time of execution in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"},
+     {"description": "OpenBSM Attribute: Status of the process","name": "status","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Track time/action process executions.",
     "examples": [],
     "foreign_keys": [],
     "function": "genTable",
     "name": "process_events",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Process (or thread) ID","name": "pid","options": {"index": true},"type": "INTEGER_TYPE"},
-     {"description": "Virtual start address (hex)","name": "start","options": {},"type": "TEXT_TYPE"},
-     {"description": "Virtual end address (hex)","name": "end","options": {},"type": "TEXT_TYPE"},
-     {"description": "r=read, w=write, x=execute, p=private (cow)","name": "permissions","options": {},"type": "TEXT_TYPE"},
-     {"description": "Offset into mapped path","name": "offset","options": {},"type": "BIGINT_TYPE"},
-     {"description": "MA:MI Major/minor device ID","name": "device","options": {},"type": "TEXT_TYPE"},
-     {"description": "Mapped path inode, 0 means uninitialized (BSS)","name": "inode","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Path to mapped file or mapped type","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "1 If path is a pseudo path, else 0","name": "pseudo","options": {},"type": "INTEGER_TYPE"}
-    ],
-    "description": "Process memory mapped files and pseudo device/regions.",
-    "examples": [
-     "select * from process_memory_map where pid = 1"
-    ],
-    "foreign_keys": [],
-    "function": "genProcessMemoryMap",
-    "name": "process_memory_map",
     "profile": {}
    },
    {
@@ -829,51 +1484,39 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Process (or thread) ID","name": "pid","options": {"index": true},"type": "INTEGER_TYPE"},
-     {"description": "Socket file descriptor number","name": "fd","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Socket handle or inode number","name": "socket","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Network protocol (IPv4, IPv6)","name": "family","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Socket local address","name": "local_address","options": {},"type": "TEXT_TYPE"},
-     {"description": "Socket remote address","name": "remote_address","options": {},"type": "TEXT_TYPE"},
-     {"description": "Socket local port","name": "local_port","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Socket remote port","name": "remote_port","options": {},"type": "INTEGER_TYPE"},
-     {"description": "For UNIX sockets (family=AF_UNIX), the domain path","name": "path","options": {},"type": "TEXT_TYPE"}
+     {"description": "Address of prometheus target","name": "target_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of collected Prometheus metric","name": "metric_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Value of collected Prometheus metric","name": "metric_value","options": {},"type": "DOUBLE_TYPE"},
+     {"description": "Unix timestamp of collected data in MS","name": "timestamp_ms","options": {},"type": "BIGINT_TYPE"}
     ],
-    "description": "Processes which have open network sockets on the system.",
-    "examples": [
-     "select * from process_open_sockets where pid = 1"
-    ],
-    "foreign_keys": [],
-    "function": "genOpenSockets",
-    "name": "process_open_sockets",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "cacheable": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "Destination IP address","name": "destination","options": {},"type": "TEXT_TYPE"},
-     {"description": "Netmask length","name": "netmask","options": {},"type": "TEXT_TYPE"},
-     {"description": "Route gateway","name": "gateway","options": {},"type": "TEXT_TYPE"},
-     {"description": "Route source","name": "source","options": {},"type": "TEXT_TYPE"},
-     {"description": "Flags to describe route","name": "flags","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Route local interface","name": "interface","options": {},"type": "TEXT_TYPE"},
-     {"description": "Maximum Transmission Unit for the route","name": "mtu","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Cost of route. Lowest is preferred","name": "metric","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Type of route","name": "type","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "The active route table for the host system.",
+    "description": "Network interfaces and relevant metadata.",
     "examples": [],
     "foreign_keys": [],
-    "function": "genRoutes",
-    "name": "routes",
+    "function": "genPrometheusMetrics",
+    "name": "prometheus_metrics",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Package display name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package-supplied version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package-supplied summary","name": "summary","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional package author","name": "author","options": {},"type": "TEXT_TYPE"},
+     {"description": "License under which package is launched","name": "license","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path at which this module resides","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Python packages installed in a system.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genPythonPackages",
+    "name": "python_packages",
     "profile": {}
    },
    {
     "attributes": {
+     "no_pkey": true,
      "user_data": true
     },
     "blacklisted": false,
@@ -915,17 +1558,14 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "The local user that owns the key file","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
-     {"description": "Path to key file","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "1 if key is encrypted, 0 otherwise","name": "encrypted","options": {},"type": "INTEGER_TYPE"}
+     {"description": "Symbol for given rule","name": "header","options": {},"type": "TEXT_TYPE"},
+     {"description": "Rule definition","name": "rule_details","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Returns the private keys in the users ~/.ssh directory and whether or not they are encrypted",
+    "description": "Rules for running commands as other users via sudo.",
     "examples": [],
-    "foreign_keys": [
-     {"column": "uid","table": "users"}
-    ],
-    "function": "getUserSshKeys",
-    "name": "user_ssh_keys",
+    "foreign_keys": [],
+    "function": "genSudoers",
+    "name": "sudoers",
     "profile": {}
    },
    {
@@ -951,7 +1591,7 @@
     "blacklisted": false,
     "columns": [
      {"description": "Full sysctl MIB name","name": "name","options": {"index": true},"type": "TEXT_TYPE"},
-     {"description": "Control MIB","name": "oid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Control MIB","name": "oid","options": {"additional": true},"type": "TEXT_TYPE"},
      {"description": "Subsystem ID, control type","name": "subsystem","options": {},"type": "TEXT_TYPE"},
      {"description": "Value of setting","name": "current_value","options": {},"type": "TEXT_TYPE"},
      {"description": "The MIB value set in /etc/sysctl.conf","name": "config_value","options": {},"type": "TEXT_TYPE"},
@@ -975,6 +1615,9 @@
      {"description": "USB Device model string","name": "model","options": {},"type": "TEXT_TYPE"},
      {"description": "Hex encoded USB Device model identifier","name": "model_id","options": {},"type": "TEXT_TYPE"},
      {"description": "USB Device serial connection","name": "serial","options": {},"type": "TEXT_TYPE"},
+     {"description": "USB Device class","name": "class","options": {},"type": "TEXT_TYPE"},
+     {"description": "USB Device subclass","name": "subclass","options": {},"type": "TEXT_TYPE"},
+     {"description": "USB Device protocol","name": "protocol","options": {},"type": "TEXT_TYPE"},
      {"description": "1 If USB device is removable else 0","name": "removable","options": {},"type": "INTEGER_TYPE"}
     ],
     "description": "USB devices that are actively plugged into the host system.",
@@ -985,11 +1628,36 @@
     "profile": {}
    },
    {
-    "attributes": {},
+    "attributes": {
+     "event_subscriber": true
+    },
     "blacklisted": false,
     "columns": [
      {"description": "User ID","name": "uid","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Group ID","name": "gid","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Audit User ID","name": "auid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Message from the event","name": "message","options": {},"type": "TEXT_TYPE"},
+     {"description": "The file description for the process socket","name": "type","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Supplied path from event","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "The Internet protocol address or family ID","name": "address","options": {},"type": "TEXT_TYPE"},
+     {"description": "The network protocol ID","name": "terminal","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time of execution in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "Track user events from the audit framework.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genTable",
+    "name": "user_events",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "User ID","name": "uid","options": {"index": true},"type": "BIGINT_TYPE"},
+     {"description": "Group ID","name": "gid","options": {"index": true},"type": "BIGINT_TYPE"}
     ],
     "description": "Local system user group relationships.",
     "examples": [],
@@ -1002,46 +1670,57 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "The path scanned","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "List of YARA matches","name": "matches","options": {},"type": "TEXT_TYPE"},
-     {"description": "Number of YARA matches","name": "count","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Signature group used","name": "sig_group","options": {},"type": "TEXT_TYPE"},
-     {"description": "Signature file used","name": "sigfile","options": {},"type": "TEXT_TYPE"},
-     {"description": "Matching strings","name": "strings","options": {},"type": "TEXT_TYPE"},
-     {"description": "Matching tags","name": "tags","options": {},"type": "TEXT_TYPE"}
+     {"description": "The local user that owns the key file","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
+     {"description": "Path to key file","name": "path","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "1 if key is encrypted, 0 otherwise","name": "encrypted","options": {},"type": "INTEGER_TYPE"}
     ],
-    "description": "Track YARA matches for files or PIDs.",
-    "examples": [
-     "select * from yara where path = '/etc/passwd'",
-     "select * from yara where path LIKE '/etc/%'",
-     "select * from yara where path = '/etc/passwd' and sigfile = '/etc/osquery/yara/test.yara'"
+    "description": "Returns the private keys in the users ~/.ssh directory and whether or not they are encrypted.",
+    "examples": [],
+    "foreign_keys": [
+     {"column": "uid","table": "users"}
     ],
+    "function": "getUserSshKeys",
+    "name": "user_ssh_keys",
+    "profile": {}
+   }
+  ]
+ },
+ {
+  "key": "freebsd",
+  "name": "FreeBSD",
+  "tables": [
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Module name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Size of module content","name": "size","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Module reverse dependencies","name": "refs","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Kernel module address","name": "address","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Loaded FreeBSD kernel modules.",
+    "examples": [],
     "foreign_keys": [],
-    "function": "genYara",
-    "name": "yara",
+    "function": "genFbsdKernelModules",
+    "name": "fbsd_kmods",
     "profile": {}
    },
    {
     "attributes": {
-     "event_subscriber": true
+     "cacheable": true
     },
     "blacklisted": false,
     "columns": [
-     {"description": "The path scanned","name": "target_path","options": {},"type": "TEXT_TYPE"},
-     {"description": "The category of the file","name": "category","options": {},"type": "TEXT_TYPE"},
-     {"description": "Change action (UPDATE, REMOVE, etc)","name": "action","options": {},"type": "TEXT_TYPE"},
-     {"description": "ID used during bulk update","name": "transaction_id","options": {},"type": "BIGINT_TYPE"},
-     {"description": "List of YARA matches","name": "matches","options": {},"type": "TEXT_TYPE"},
-     {"description": "Number of YARA matches","name": "count","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Time of the scan","name": "time","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Matching strings","name": "strings","options": {},"type": "TEXT_TYPE"},
-     {"description": "Matching tags","name": "tags","options": {},"type": "TEXT_TYPE"}
+     {"description": "Package name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Package size in bytes","name": "flatsize","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Architecture(s) supported","name": "arch","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Track YARA matches for files specified in configuration data.",
+    "description": "pkgng packages that are currently installed on the host system.",
     "examples": [],
     "foreign_keys": [],
-    "function": "genTable",
-    "name": "yara_events",
+    "function": "genPkgPackages",
+    "name": "pkg_packages",
     "profile": {}
    }
   ]
@@ -1071,29 +1750,6 @@
     "profile": {}
    },
    {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
-     {"description": "Name of the cpu (core)","name": "core","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Time spent in user mode","name": "user","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent in user mode with low priority (nice)","name": "nice","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent in system mode","name": "system","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent in the idle task","name": "idle","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent waiting for I/O to complete","name": "iowait","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent servicing interrupts","name": "irq","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent servicing softirqs","name": "softirq","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent in other operating systems when running in a virtualized environment","name": "steal","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent running a virtual CPU for a guest OS under the control of the Linux kernel","name": "guest","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time spent running a niced guest ","name": "guest_nice","options": {},"type": "BIGINT_TYPE"}
-    ],
-    "description": "Displays information from /proc/stat file about the time the cpu cores spent in different parts of the system.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genCpuTime",
-    "name": "cpu_time",
-    "profile": {}
-   },
-   {
     "attributes": {
      "cacheable": true
     },
@@ -1111,6 +1767,55 @@
     "foreign_keys": [],
     "function": "genDebPackages",
     "name": "deb_packages",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "EC2 instance ID","name": "instance_id","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "EC2 instance type","name": "instance_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Hardware architecture of this EC2 instance","name": "architecture","options": {},"type": "TEXT_TYPE"},
+     {"description": "AWS region in which this instance launched","name": "region","options": {},"type": "TEXT_TYPE"},
+     {"description": "Availability zone in which this instance launched","name": "availability_zone","options": {},"type": "TEXT_TYPE"},
+     {"description": "Private IPv4 DNS hostname of the first interface of this instance","name": "local_hostname","options": {},"type": "TEXT_TYPE"},
+     {"description": "Private IPv4 address of the first interface of this instance","name": "local_ipv4","options": {},"type": "TEXT_TYPE"},
+     {"description": "MAC address for the first network interface of this EC2 instance","name": "mac","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comma separated list of security group names","name": "security_groups","options": {},"type": "TEXT_TYPE"},
+     {"description": "If there is an IAM role associated with the instance, contains instance profile ARN","name": "iam_arn","options": {},"type": "TEXT_TYPE"},
+     {"description": "AMI ID used to launch this EC2 instance","name": "ami_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "ID of the reservation","name": "reservation_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "AWS account ID which owns this EC2 instance","name": "account_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "SSH public key. Only available if supplied at instance launch time","name": "ssh_public_key","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "EC2 instance metadata.",
+    "examples": [
+     "select * from ec2_instance_metadata"
+    ],
+    "foreign_keys": [],
+    "function": "genEc2Metadata",
+    "name": "ec2_instance_metadata",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "EC2 instance ID","name": "instance_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Tag key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Tag value","name": "value","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "EC2 instance tag key value pairs.",
+    "examples": [
+     "select * from ec2_instance_tags"
+    ],
+    "foreign_keys": [],
+    "function": "genEc2InstanceTags",
+    "name": "ec2_instance_tags",
     "profile": {}
    },
    {
@@ -1178,17 +1883,89 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
-     {"description": "Total amount of physical RAM, in bytes","name": "memory_total","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The amount of physical RAM, in bytes, left unused by the system","name": "memory_free","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The amount of physical RAM, in bytes, used for file buffers","name": "buffers","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The amount of physical RAM, in bytes, used as cache memory","name": "cached","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The amount of swap, in bytes, used as cache memory","name": "swap_cached","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The total amount of buffer or page cache memory, in bytes, that is in active use","name": "active","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The total amount of buffer or page cache memory, in bytes, that are free and available","name": "inactive","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The total amount of swap available, in bytes","name": "swap_total","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The total amount of swap free, in bytes","name": "swap_free","options": {},"type": "INTEGER_TYPE"}
+     {"description": "md device name","name": "device_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Current state of the array","name": "status","options": {},"type": "TEXT_TYPE"},
+     {"description": "Current raid level of the array","name": "raid_level","options": {},"type": "INTEGER_TYPE"},
+     {"description": "size of the array in blocks","name": "size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "chunk size in bytes","name": "chunk_size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Number of configured RAID disks in array","name": "raid_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of partitions or disk devices to comprise the array","name": "nr_raid_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of working disks in array","name": "working_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of active disks in array","name": "active_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of active disks in array","name": "failed_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Number of active disks in array","name": "spare_disks","options": {},"type": "INTEGER_TYPE"},
+     {"description": "State of the superblock","name": "superblock_state","options": {},"type": "TEXT_TYPE"},
+     {"description": "Version of the superblock","name": "superblock_version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Unix timestamp of last update","name": "superblock_update_time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Pages allocated in in-memory bitmap, if enabled","name": "bitmap_on_mem","options": {},"type": "TEXT_TYPE"},
+     {"description": "Bitmap chunk size","name": "bitmap_chunk_size","options": {},"type": "TEXT_TYPE"},
+     {"description": "External referenced bitmap file","name": "bitmap_external_file","options": {},"type": "TEXT_TYPE"},
+     {"description": "Progress of the recovery activity","name": "recovery_progress","options": {},"type": "TEXT_TYPE"},
+     {"description": "Estimated duration of recovery activity","name": "recovery_finish","options": {},"type": "TEXT_TYPE"},
+     {"description": "Speed of recovery activity","name": "recovery_speed","options": {},"type": "TEXT_TYPE"},
+     {"description": "Progress of the resync activity","name": "resync_progress","options": {},"type": "TEXT_TYPE"},
+     {"description": "Estimated duration of resync activity","name": "resync_finish","options": {},"type": "TEXT_TYPE"},
+     {"description": "Speed of resync activity","name": "resync_speed","options": {},"type": "TEXT_TYPE"},
+     {"description": "Progress of the reshape activity","name": "reshape_progress","options": {},"type": "TEXT_TYPE"},
+     {"description": "Estimated duration of reshape activity","name": "reshape_finish","options": {},"type": "TEXT_TYPE"},
+     {"description": "Speed of reshape activity","name": "reshape_speed","options": {},"type": "TEXT_TYPE"},
+     {"description": "Progress of the resync activity","name": "check_array_progress","options": {},"type": "TEXT_TYPE"},
+     {"description": "Estimated duration of resync activity","name": "check_array_finish","options": {},"type": "TEXT_TYPE"},
+     {"description": "Speed of resync activity","name": "check_array_speed","options": {},"type": "TEXT_TYPE"},
+     {"description": "Unused devices","name": "unused_devices","options": {},"type": "TEXT_TYPE"},
+     {"description": "Other information associated with array from /proc/mdstat","name": "other","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Main memory information, in bytes",
+    "description": "Software RAID array settings.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genMDDevices",
+    "name": "md_devices",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "md device name","name": "md_device_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Drive device name","name": "drive_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Slot position of disk","name": "slot","options": {},"type": "INTEGER_TYPE"},
+     {"description": "State of the drive","name": "state","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Drive devices used for Software RAID.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genMDDrives",
+    "name": "md_drives",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of personality supported by kernel","name": "name","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Software RAID setting supported by the kernel.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genMDPersonalities",
+    "name": "md_personalities",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Total amount of physical RAM, in bytes","name": "memory_total","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The amount of physical RAM, in bytes, left unused by the system","name": "memory_free","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The amount of physical RAM, in bytes, used for file buffers","name": "buffers","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The amount of physical RAM, in bytes, used as cache memory","name": "cached","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The amount of swap, in bytes, used as cache memory","name": "swap_cached","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total amount of buffer or page cache memory, in bytes, that is in active use","name": "active","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total amount of buffer or page cache memory, in bytes, that are free and available","name": "inactive","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total amount of swap available, in bytes","name": "swap_total","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total amount of swap free, in bytes","name": "swap_free","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "Main memory information in bytes.",
     "examples": [],
     "foreign_keys": [],
     "function": "getMemoryInfo",
@@ -1230,6 +2007,58 @@
     "foreign_keys": [],
     "function": "genModelSpecificRegister",
     "name": "msr",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Package name","name": "package","options": {},"type": "TEXT_TYPE"},
+     {"description": "The version which are affected by the use flags, empty means all","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "The keyword applied to the package","name": "keyword","options": {},"type": "TEXT_TYPE"},
+     {"description": "If the package is masked","name": "mask","options": {},"type": "INTEGER_TYPE"},
+     {"description": "If the package is unmasked","name": "unmask","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "A summary about portage configurations like keywords, mask and unmask.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genPortageKeywordSummary",
+    "name": "portage_keywords",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Package name","name": "package","options": {},"type": "TEXT_TYPE"},
+     {"description": "The version which are affected by the use flags, empty means all","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "The slot used by package","name": "slot","options": {},"type": "TEXT_TYPE"},
+     {"description": "Unix time when package was built","name": "build_time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "From which repository the ebuild was used","name": "repository","options": {},"type": "TEXT_TYPE"},
+     {"description": "The eapi for the ebuild","name": "eapi","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The size of the package","name": "size","options": {},"type": "BIGINT_TYPE"},
+     {"description": "If package is in the world file","name": "world","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "List of currently installed packages.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "portagePackages",
+    "name": "portage_packages",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Package name","name": "package","options": {},"type": "TEXT_TYPE"},
+     {"description": "The version of the installed package","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "USE flag which has been enabled for package","name": "use","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "List of enabled portage USE values for specific package.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genPortageUse",
+    "name": "portage_use",
     "profile": {}
    },
    {
@@ -1307,16 +2136,18 @@
      {"description": "Process (or thread) ID","name": "pid","options": {},"type": "BIGINT_TYPE"},
      {"description": "Path of executed file","name": "path","options": {},"type": "TEXT_TYPE"},
      {"description": "The file description for the process socket","name": "fd","options": {},"type": "TEXT_TYPE"},
+     {"description": "Audit User ID","name": "auid","options": {},"type": "BIGINT_TYPE"},
      {"description": "The socket open attempt status","name": "success","options": {},"type": "INTEGER_TYPE"},
      {"description": "The Internet protocol family ID","name": "family","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The network protocol ID","name": "protocol","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The network protocol ID","name": "protocol","options": {"hidden": true},"type": "INTEGER_TYPE"},
      {"description": "Local address associated with socket","name": "local_address","options": {},"type": "TEXT_TYPE"},
      {"description": "Remote address associated with socket","name": "remote_address","options": {},"type": "TEXT_TYPE"},
      {"description": "Local network protocol port number","name": "local_port","options": {},"type": "INTEGER_TYPE"},
      {"description": "Remote network protocol port number","name": "remote_port","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The local path (UNIX domain socket only)","name": "socket","options": {},"type": "TEXT_TYPE"},
+     {"description": "The local path (UNIX domain socket only)","name": "socket","options": {"hidden": true},"type": "TEXT_TYPE"},
      {"description": "Time of execution in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Track network socket opens and closes.",
     "examples": [],
@@ -1337,36 +2168,14 @@
      {"description": "Syslog severity","name": "severity","options": {},"type": "INTEGER_TYPE"},
      {"description": "Syslog facility","name": "facility","options": {},"type": "TEXT_TYPE"},
      {"description": "The syslog tag","name": "tag","options": {},"type": "TEXT_TYPE"},
-     {"description": "The syslog message","name": "message","options": {},"type": "TEXT_TYPE"}
+     {"description": "The syslog message","name": "message","options": {},"type": "TEXT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "",
     "examples": [],
     "foreign_keys": [],
     "function": "genTable",
-    "name": "syslog",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "event_subscriber": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "User ID","name": "uid","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Path of executed file","name": "message","options": {},"type": "TEXT_TYPE"},
-     {"description": "The file description for the process socket","name": "type","options": {},"type": "INTEGER_TYPE"},
-     {"description": "The socket open attempt status","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "The Internet protocol family ID","name": "address","options": {},"type": "TEXT_TYPE"},
-     {"description": "The network protocol ID","name": "terminal","options": {},"type": "TEXT_TYPE"},
-     {"description": "Time of execution in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time of execution in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"}
-    ],
-    "description": "Track user events from the audit framework.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genTable",
-    "name": "user_events",
+    "name": "syslog_events",
     "profile": {}
    }
   ]
@@ -1462,7 +2271,7 @@
      {"description": "1 if this handler does NOT exist on OS X by default, else 0","name": "external","options": {},"type": "INTEGER_TYPE"},
      {"description": "1 if this handler is protected (reserved) by OS X, else 0","name": "protected","options": {},"type": "INTEGER_TYPE"}
     ],
-    "description": "OS X application schemes and handlers (e.g., http, file, mailto.",
+    "description": "OS X application schemes and handlers (e.g., http, file, mailto).",
     "examples": [],
     "foreign_keys": [],
     "function": "genAppSchemes",
@@ -1519,7 +2328,7 @@
      {"description": "Reference process for messages proxied by launchd","name": "ref_proc","options": {},"type": "TEXT_TYPE"},
      {"description": "Extra columns, in JSON format. Queries against this column are performed entirely in SQLite, so do not benefit from efficient querying via asl.h.","name": "extra","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Queries the Apple System Log data structure for system events",
+    "description": "Queries the Apple System Log data structure for system events.",
     "examples": [],
     "foreign_keys": [],
     "function": "genAsl",
@@ -1584,7 +2393,7 @@
     "columns": [
      {"description": "The local user that owns the plugin","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
      {"description": "Plugin display name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Plugin identifier","name": "identifier","options": {},"type": "TEXT_TYPE"},
+     {"description": "Plugin identifier","name": "identifier","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Plugin short version","name": "version","options": {},"type": "TEXT_TYPE"},
      {"description": "Build SDK used to compile plugin","name": "sdk","options": {},"type": "TEXT_TYPE"},
      {"description": "Plugin description text","name": "description","options": {},"type": "TEXT_TYPE"},
@@ -1604,46 +2413,19 @@
    },
    {
     "attributes": {
-     "cacheable": true
+     "user_data": true
     },
     "blacklisted": false,
     "columns": [
-     {"description": "Certificate CommonName","name": "common_name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Certificate distinguished name","name": "subject","options": {},"type": "TEXT_TYPE"},
-     {"description": "Certificate issuer distinguished name","name": "issuer","options": {},"type": "TEXT_TYPE"},
-     {"description": "1 if CA: true (certificate is an authority) else 0","name": "ca","options": {},"type": "INTEGER_TYPE"},
-     {"description": "1 if self-signed, else 0","name": "self_signed","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Lower bound of valid date","name": "not_valid_before","options": {},"type": "TEXT_TYPE"},
-     {"description": "Certificate expiration data","name": "not_valid_after","options": {},"type": "TEXT_TYPE"},
-     {"description": "Signing algorithm used","name": "signing_algorithm","options": {},"type": "TEXT_TYPE"},
-     {"description": "Key algorithm used","name": "key_algorithm","options": {},"type": "TEXT_TYPE"},
-     {"description": "Key size used for RSA/DSA, or curve name","name": "key_strength","options": {},"type": "TEXT_TYPE"},
-     {"description": "Certificate key usage and extended key usage","name": "key_usage","options": {},"type": "TEXT_TYPE"},
-     {"description": "SKID an optionally included SHA1","name": "subject_key_id","options": {},"type": "TEXT_TYPE"},
-     {"description": "AKID an optionally included SHA1","name": "authority_key_id","options": {},"type": "TEXT_TYPE"},
-     {"description": "SHA1 hash of the raw certificate contents","name": "sha1","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path to Keychain or PEM bundle","name": "path","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Certificate Authorities installed in Keychains/ca-bundles.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genCerts",
-    "name": "certificates",
-    "profile": {}
-   },
-   {
-    "attributes": {},
-    "blacklisted": false,
-    "columns": [
      {"description": "Type of crash log","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "Process (or thread) ID of the crashed process","name": "pid","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Path to the crashed process","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Process (or thread) ID of the crashed process","name": "pid","options": {"index": true},"type": "BIGINT_TYPE"},
+     {"description": "Path to the crashed process","name": "path","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Location of log file","name": "crash_path","options": {},"type": "TEXT_TYPE"},
      {"description": "Identifier of the crashed process","name": "identifier","options": {},"type": "TEXT_TYPE"},
      {"description": "Version info of the crashed process","name": "version","options": {},"type": "TEXT_TYPE"},
-     {"description": "Parent PID of the crashed process","name": "parent","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Parent PID of the crashed process","name": "parent","options": {"index": true},"type": "BIGINT_TYPE"},
      {"description": "Process responsible for the crashed process","name": "responsible","options": {},"type": "TEXT_TYPE"},
-     {"description": "User ID of the crashed process","name": "uid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "User ID of the crashed process","name": "uid","options": {"additional": true},"type": "INTEGER_TYPE"},
      {"description": "Date/Time at which the crash occurred","name": "datetime","options": {},"type": "TEXT_TYPE"},
      {"description": "Thread ID which crashed","name": "crashed_thread","options": {},"type": "BIGINT_TYPE"},
      {"description": "Most recent frame from the stack trace","name": "stack_trace","options": {},"type": "TEXT_TYPE"},
@@ -1652,11 +2434,26 @@
      {"description": "Exception notes from the crash","name": "exception_notes","options": {},"type": "TEXT_TYPE"},
      {"description": "The value of the system registers","name": "registers","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Application and System Crash Logs",
+    "description": "Application, System, and Mobile App crash logs.",
     "examples": [],
     "foreign_keys": [],
     "function": "genCrashLogs",
     "name": "crashes",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Type of device","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "The device name","name": "device","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Firmware version","name": "version","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "A best-effort list of discovered firmware versions.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genDeviceFirmware",
+    "name": "device_firmware",
     "profile": {}
    },
    {
@@ -1668,7 +2465,7 @@
      {"description": "Appear or disappear","name": "action","options": {},"type": "TEXT_TYPE"},
      {"description": "Path of the DMG file accessed","name": "path","options": {},"type": "TEXT_TYPE"},
      {"description": "Disk event name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Disk event BSD name","name": "bsd_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Disk event BSD name","name": "device","options": {},"type": "TEXT_TYPE"},
      {"description": "UUID of the volume inside DMG if available","name": "uuid","options": {},"type": "TEXT_TYPE"},
      {"description": "Size of partition in bytes","name": "size","options": {},"type": "BIGINT_TYPE"},
      {"description": "1 if ejectable, 0 if not","name": "ejectable","options": {},"type": "INTEGER_TYPE"},
@@ -1679,7 +2476,8 @@
      {"description": "Disk event vendor string","name": "vendor","options": {},"type": "TEXT_TYPE"},
      {"description": "Filesystem if available","name": "filesystem","options": {},"type": "TEXT_TYPE"},
      {"description": "UDIF Master checksum if available (CRC32)","name": "checksum","options": {},"type": "TEXT_TYPE"},
-     {"description": "Time of appearance/disappearance in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of appearance/disappearance in UNIX time","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Track DMG disk image events (appearance/disappearance) when opened.",
     "examples": [],
@@ -1692,13 +2490,30 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
+     {"description": "Is the Event Tap enabled","name": "enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Unique ID for the Tap","name": "event_tap_id","options": {"index": true},"type": "INTEGER_TYPE"},
+     {"description": "The mask that identifies the set of events to be observed.","name": "event_tapped","options": {},"type": "TEXT_TYPE"},
+     {"description": "The process ID of the target application","name": "process_being_tapped","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The process ID of the application that created the event tap.","name": "tapping_process","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Returns information about installed event taps.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genEventTaps",
+    "name": "event_taps",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
      {"description": "Absolute file path","name": "path","options": {"required": true},"type": "TEXT_TYPE"},
      {"description": "Directory of file(s)","name": "directory","options": {"required": true},"type": "TEXT_TYPE"},
      {"description": "Name of the value generated from the extended attribute","name": "key","options": {},"type": "TEXT_TYPE"},
      {"description": "The parsed information from the attribute","name": "value","options": {},"type": "TEXT_TYPE"},
      {"description": "1 if the value is base64 encoded else 0","name": "base64","options": {},"type": "INTEGER_TYPE"}
     ],
-    "description": "Get the extended attributes for files (similar to Windows ADS)",
+    "description": "Returns the extended attributes for files (similar to Windows ADS).",
     "examples": [],
     "foreign_keys": [],
     "function": "genXattr",
@@ -1721,6 +2536,38 @@
     "foreign_keys": [],
     "function": "genFanSpeedSensors",
     "name": "fan_speed_sensors",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "1 If a Gatekeeper is enabled else 0","name": "assessments_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If a Gatekeeper allows execution from identified developers else 0","name": "dev_id_enabled","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Version of Gatekeeper's gke.bundle","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Version of Gatekeeper's gkopaque.bundle","name": "opaque_version","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "OS X Gatekeeper Details.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genGateKeeper",
+    "name": "gatekeeper",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Path of executable allowed to run","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Code signing requirement language","name": "requirement","options": {},"type": "TEXT_TYPE"},
+     {"description": "Last change time","name": "ctime","options": {},"type": "DOUBLE_TYPE"},
+     {"description": "Last modification time","name": "mtime","options": {},"type": "DOUBLE_TYPE"}
+    ],
+    "description": "Gatekeeper apps a user has allowed to run.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genGateKeeperApprovedApps",
+    "name": "gatekeeper_approved_apps",
     "profile": {}
    },
    {
@@ -1821,7 +2668,7 @@
      {"description": "Last loaded module before panic","name": "last_loaded","options": {},"type": "TEXT_TYPE"},
      {"description": "Last unloaded module before panic","name": "last_unloaded","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Kernel Panics",
+    "description": "System kernel panic logs.",
     "examples": [],
     "foreign_keys": [],
     "function": "genKernelPanics",
@@ -1859,9 +2706,9 @@
      {"description": "Data item was created","name": "created","options": {},"type": "TEXT_TYPE"},
      {"description": "Date of last modification","name": "modified","options": {},"type": "TEXT_TYPE"},
      {"description": "Keychain item type (class)","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path to keychain containing item","name": "path","options": {"additional": true},"type": "TEXT_TYPE"}
+     {"description": "Path to keychain containing item","name": "path","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Generic details about keychain items",
+    "description": "Generic details about keychain items.",
     "examples": [],
     "foreign_keys": [],
     "function": "genKeychainItems",
@@ -2014,12 +2861,12 @@
     "blacklisted": false,
     "columns": [
      {"description": "Package domain identifier","name": "package_id","options": {},"type": "TEXT_TYPE"},
-     {"description": "Filename of original .pkg file","name": "package_filename","options": {},"type": "TEXT_TYPE"},
+     {"description": "Filename of original .pkg file","name": "package_filename","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Installed package version","name": "version","options": {},"type": "TEXT_TYPE"},
      {"description": "Optional relative install path on volume","name": "location","options": {},"type": "TEXT_TYPE"},
      {"description": "Timestamp of install time","name": "install_time","options": {},"type": "DOUBLE_TYPE"},
      {"description": "Name of installer process","name": "installer_name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path of receipt plist","name": "path","options": {"additional": true,"index": true},"type": "TEXT_TYPE"}
+     {"description": "Path of receipt plist","name": "path","options": {"additional": true},"type": "TEXT_TYPE"}
     ],
     "description": "OS X package receipt details.",
     "examples": [
@@ -2028,6 +2875,24 @@
     "foreign_keys": [],
     "function": "genPackageReceipts",
     "name": "package_receipts",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Preference top-level key","name": "key","options": {},"type": "TEXT_TYPE"},
+     {"description": "Intemediate key path, includes lists/dicts","name": "subkey","options": {},"type": "TEXT_TYPE"},
+     {"description": "String value of most CF types","name": "value","options": {},"type": "TEXT_TYPE"},
+     {"description": "(optional) read preferences from a plist","name": "path","options": {"required": true},"type": "TEXT_TYPE"}
+    ],
+    "description": "Read and parse a plist file.",
+    "examples": [
+     "select * from plist where path = '/Library/Preferences/loginwindow.plist'"
+    ],
+    "foreign_keys": [],
+    "function": "genOSXPlist",
+    "name": "plist",
     "profile": {}
    },
    {
@@ -2051,23 +2916,24 @@
     "profile": {}
    },
    {
-    "attributes": {},
+    "attributes": {
+     "user_data": true
+    },
     "blacklisted": false,
     "columns": [
      {"description": "Application ID usually in com.name.product format","name": "domain","options": {"index": true},"type": "TEXT_TYPE"},
-     {"description": "Preference top-level key","name": "key","options": {},"type": "TEXT_TYPE"},
-     {"description": "Intemediate key path, includes lists/dicts","name": "subkey","options": {},"type": "TEXT_TYPE"},
+     {"description": "Preference top-level key","name": "key","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Intemediate key path, includes lists/dicts","name": "subkey","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "String value of most CF types","name": "value","options": {},"type": "TEXT_TYPE"},
      {"description": "1 if the value is forced/managed, else 0","name": "forced","options": {},"type": "INTEGER_TYPE"},
-     {"description": "(optional) read preferences from a plist","name": "path","options": {"additional": true},"type": "TEXT_TYPE"}
+     {"description": "(optional) read preferences for a specific user","name": "username","options": {"additional": true},"type": "TEXT_TYPE"}
     ],
     "description": "OS X defaults and managed preferences.",
     "examples": [
-     "select * from preferences where domain = 'loginwindow'",
-     "select * from preferences where path = '/Library/Preferences/loginwindow.plist'"
+     "select * from preferences where domain = 'loginwindow'"
     ],
     "foreign_keys": [],
-    "function": "genOSXPreferences",
+    "function": "genOSXDefaultPreferences",
     "name": "preferences",
     "profile": {}
    },
@@ -2092,7 +2958,8 @@
      {"description": "Time of last modification in UNIX epoch time","name": "mtime","options": {},"type": "BIGINT_TYPE"},
      {"description": "Time of last status change","name": "ctime","options": {},"type": "BIGINT_TYPE"},
      {"description": "Time of event in UNIX epoch time","name": "time","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Time of event in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"}
+     {"description": "Time of event in system uptime","name": "uptime","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Event ID","name": "eid","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Process file events (open and close) from kernel extension.",
     "examples": [],
@@ -2120,7 +2987,7 @@
      {"description": "Thumbnail icon mode","name": "icon_mode","options": {},"type": "BIGINT_TYPE"},
      {"description": "Path to cache data","name": "cache_path","options": {},"type": "TEXT_TYPE"}
     ],
-    "description": "Files and thumbnails within OS X's Quicklook Cache",
+    "description": "Files and thumbnails within OS X's Quicklook Cache.",
     "examples": [],
     "foreign_keys": [],
     "function": "genQuicklookCache",
@@ -2135,7 +3002,7 @@
     "columns": [
      {"description": "The local user that owns the extension","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
      {"description": "Extension display name","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Extension identifier","name": "identifier","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension identifier","name": "identifier","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Extension long version","name": "version","options": {},"type": "TEXT_TYPE"},
      {"description": "Bundle SDK used to compile extension","name": "sdk","options": {},"type": "TEXT_TYPE"},
      {"description": "Extension-supplied update URI","name": "update_url","options": {},"type": "TEXT_TYPE"},
@@ -2179,6 +3046,41 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
+     {"description": "The shared name of the folder as it appears to other users","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Absolute path of shared folder on the local system","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Folders available to others via SMB or AFP.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genSharedFolders",
+    "name": "shared_folders",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "1 If screen sharing is enabled else 0","name": "screen_sharing","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If file sharing is enabled else 0","name": "file_sharing","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If printer sharing is enabled else 0","name": "printer_sharing","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If remote login is enabled else 0","name": "remote_login","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If remote management is enabled else 0","name": "remote_management","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If remote apple events are enabled else 0","name": "remote_apple_events","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If internet sharing is enabled else 0","name": "internet_sharing","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If bluetooth sharing is enabled for any user else 0","name": "bluetooth_sharing","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 If CD or DVD sharing is enabled else 0","name": "disc_sharing","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "OS X Sharing preferences.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genSharingPreferences",
+    "name": "sharing_preferences",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
      {"description": "Must provide a path or directory","name": "path","options": {"required": true},"type": "TEXT_TYPE"},
      {"description": "1 If the file is signed else 0","name": "signed","options": {},"type": "INTEGER_TYPE"},
      {"description": "The signing identifier sealed into the signature","name": "identifier","options": {},"type": "TEXT_TYPE"},
@@ -2203,7 +3105,7 @@
      {"description": "1 if this configuration is enabled, otherwise 0","name": "enabled","options": {},"type": "INTEGER_TYPE"},
      {"description": "1 if this configuration is enabled, otherwise 0","name": "enabled_nvram","options": {},"type": "INTEGER_TYPE"}
     ],
-    "description": "Apple's System Integrity Protection (rootless) status",
+    "description": "Apple's System Integrity Protection (rootless) status.",
     "examples": [
      "select * from sip_config"
     ],
@@ -2232,31 +3134,13 @@
     "profile": {}
    },
    {
-    "attributes": {
-     "cacheable": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "Name of startup item","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Path of startup item","name": "path","options": {},"type": "TEXT_TYPE"},
-     {"description": "Startup Item or Login Item","name": "type","options": {},"type": "TEXT_TYPE"},
-     {"description": "Directory or plist containing startup item","name": "source","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Applications and binaries set as user/login startup items.",
-    "examples": [],
-    "foreign_keys": [],
-    "function": "genStartupItems",
-    "name": "startup_items",
-    "profile": {}
-   },
-   {
     "attributes": {},
     "blacklisted": false,
     "columns": [
      {"description": "The SMC key on OS X","name": "key","options": {"index": true},"type": "TEXT_TYPE"},
      {"description": "Name of temperature source","name": "name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Temperature in Celsius","name": "celsius","options": {},"type": "TEXT_TYPE"},
-     {"description": "Temperature in Fahrenheit","name": "fahrenheit","options": {},"type": "TEXT_TYPE"}
+     {"description": "Temperature in Celsius","name": "celsius","options": {},"type": "DOUBLE_TYPE"},
+     {"description": "Temperature in Fahrenheit","name": "fahrenheit","options": {},"type": "DOUBLE_TYPE"}
     ],
     "description": "Machine's temperature sensors.",
     "examples": [],
@@ -2265,6 +3149,79 @@
     ],
     "function": "genTemperatureSensors",
     "name": "temperature_sensors",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Time Machine destination ID","name": "destination_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Backup Date","name": "backup_date","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Backups to drives using TimeMachine.",
+    "examples": [
+     "select alias, backup_date, td.destination_id, root_volume_uuid, encryption from time_machine_backups tb join time_machine_destinations td on (td.destination_id=tb.destination_id);"
+    ],
+    "foreign_keys": [],
+    "function": "genTimeMachineBackups",
+    "name": "time_machine_backups",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Human readable name of drive","name": "alias","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time Machine destination ID","name": "destination_id","options": {},"type": "TEXT_TYPE"},
+     {"description": "Consistency scan date","name": "consistency_scan_date","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Root UUID of backup volume","name": "root_volume_uuid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Bytes available on volume","name": "bytes_available","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Bytes used on volume","name": "bytes_used","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Last known encrypted state","name": "encryption","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Locations backed up to using Time Machine.",
+    "examples": [
+     "select alias, backup_date, td.destination_id, root_volume_uuid, encryption from time_machine_backups tb join time_machine_destinations td on (td.destination_id=tb.destination_id);"
+    ],
+    "foreign_keys": [],
+    "function": "genTimeMachineDestinations",
+    "name": "time_machine_destinations",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Total number of free pages.","name": "free","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of active pages.","name": "active","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of inactive pages.","name": "inactive","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of speculative pages.","name": "speculative","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of throttled pages.","name": "throttled","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of wired down pages.","name": "wired","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of purgeable pages.","name": "purgeable","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of calls to vm_faults.","name": "faults","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of copy-on-write pages.","name": "copy","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of zero filled pages.","name": "zero_fill","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of reactivated pages.","name": "reactivated","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of purged pages.","name": "purged","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of file backed pages.","name": "file_backed","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of anonymous pages.","name": "anonymous","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of uncompressed pages.","name": "uncompressed","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The number of pages used to store compressed VM pages.","name": "compressor","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total number of pages that have been decompressed by the VM compressor.","name": "decompressed","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total number of pages that have been compressed by the VM compressor.","name": "compressed","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total number of requests for pages from a pager.","name": "page_ins","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Total number of pages paged out.","name": "page_outs","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total number of compressed pages that have been swapped out to disk.","name": "swap_ins","options": {},"type": "BIGINT_TYPE"},
+     {"description": "The total number of compressed pages that have been swapped back in from disk.","name": "swap_outs","options": {},"type": "BIGINT_TYPE"}
+    ],
+    "description": "Darwin Virtual Memory statistics.",
+    "examples": [
+     "select * from virtual_memory_info;"
+    ],
+    "foreign_keys": [],
+    "function": "genVirtualMemoryInfo",
+    "name": "virtual_memory_info",
     "profile": {}
    },
    {
@@ -2291,6 +3248,57 @@
     "foreign_keys": [],
     "function": "genKnownWifiNetworks",
     "name": "wifi_networks",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": false
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the interface","name": "interface","options": {},"type": "TEXT_TYPE"},
+     {"description": "SSID octets of the network","name": "ssid","options": {},"type": "TEXT_TYPE"},
+     {"description": "The current basic service set identifier","name": "bssid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the network","name": "network_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "The country code (ISO/IEC 3166-1:1997) for the network","name": "country_code","options": {},"type": "TEXT_TYPE"},
+     {"description": "The current received signal strength indication (dbm)","name": "rssi","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The current noise measurement (dBm)","name": "noise","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel number","name": "channel","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel width","name": "channel_width","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel band","name": "channel_band","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Scan for nearby WiFi networks.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genWifiScan",
+    "name": "wifi_survey",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of the interface","name": "interface","options": {},"type": "TEXT_TYPE"},
+     {"description": "SSID octets of the network","name": "ssid","options": {},"type": "TEXT_TYPE"},
+     {"description": "The current basic service set identifier","name": "bssid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Name of the network","name": "network_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "The country code (ISO/IEC 3166-1:1997) for the network","name": "country_code","options": {},"type": "TEXT_TYPE"},
+     {"description": "Type of security on this network","name": "security_type","options": {},"type": "TEXT_TYPE"},
+     {"description": "The current received signal strength indication (dbm)","name": "rssi","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The current noise measurement (dBm)","name": "noise","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel number","name": "channel","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel width","name": "channel_width","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Channel band","name": "channel_band","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The current transmit rate","name": "transmit_rate","options": {},"type": "TEXT_TYPE"},
+     {"description": "The current operating mode for the Wi-Fi interface","name": "mode","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "OS X current WiFi status.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genWifiStatus",
+    "name": "wifi_status",
     "profile": {}
    },
    {
@@ -2357,6 +3365,22 @@
     "attributes": {},
     "blacklisted": false,
     "columns": [
+     {"description": "IPv4 address target","name": "address","options": {},"type": "TEXT_TYPE"},
+     {"description": "MAC address of broadcasted address","name": "mac","options": {},"type": "TEXT_TYPE"},
+     {"description": "Interface of the network for the MAC","name": "interface","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 for true, 0 for false","name": "permanent","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Address resolution cache, both static and dynamic (from ARP, NDP).",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genArpCache",
+    "name": "arp_cache",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
      {"description": "Sensor ID of the Carbon Black sensor","name": "sensor_id","options": {},"type": "INTEGER_TYPE"},
      {"description": "Sensor group","name": "config_name","options": {},"type": "TEXT_TYPE"},
      {"description": "If the sensor is configured to send back binaries to the Carbon Black server","name": "collect_store_files","options": {},"type": "INTEGER_TYPE"},
@@ -2379,11 +3403,61 @@
      {"description": "Size in bytes of Carbon Black event files on disk","name": "event_queue","options": {},"type": "INTEGER_TYPE"},
      {"description": "Size in bytes of binaries waiting to be sent to Carbon Black server","name": "binary_queue","options": {},"type": "INTEGER_TYPE"}
     ],
-    "description": "Returns info about a Carbon Black sensor install",
+    "description": "Returns info about a Carbon Black sensor install.",
     "examples": [],
     "foreign_keys": [],
     "function": "genCarbonBlackInfo",
     "name": "carbon_black_info",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "user_data": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Time at which the carve was kicked off","name": "time","options": {},"type": "BIGINT_TYPE"},
+     {"description": "A SHA256 sum of the carved archive","name": "sha256","options": {},"type": "TEXT_TYPE"},
+     {"description": "Size of the carved archive","name": "size","options": {},"type": "INTEGER_TYPE"},
+     {"description": "The path of the requested carve","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Status of the carve, can be STARTING, PENDING, SUCCESS, or FAILED","name": "status","options": {},"type": "TEXT_TYPE"},
+     {"description": "Identifying value of the carve session","name": "carve_guid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Set this value to '1' to start a file carve","name": "carve","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Forensic Carves.",
+    "examples": [
+     "select * from carves where status like '%FAIL%'",
+     "select * from carves where path like '/Users/%/Downloads/%' and carve=1"
+    ],
+    "foreign_keys": [],
+    "function": "genCarves",
+    "name": "carves",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "user_data": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "The local user that owns the extension","name": "uid","options": {"additional": true},"type": "BIGINT_TYPE"},
+     {"description": "Extension display name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension identifier","name": "identifier","options": {"index": true},"type": "TEXT_TYPE"},
+     {"description": "Extension-supplied version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension-optional description","name": "description","options": {},"type": "TEXT_TYPE"},
+     {"description": "Default locale supported by extension","name": "locale","options": {},"type": "TEXT_TYPE"},
+     {"description": "Extension-supplied update URI","name": "update_url","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional extension author","name": "author","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 If extension is persistent across all tabs else 0","name": "persistent","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Path to extension folder","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Chrome browser extensions.",
+    "examples": [],
+    "foreign_keys": [
+     {"column": "uid","table": "users"}
+    ],
+    "function": "genChromeExtensions",
+    "name": "chrome_extensions",
     "profile": {}
    },
    {
@@ -2425,11 +3499,69 @@
     },
     "blacklisted": false,
     "columns": [
+     {"description": "Protocol name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Protocol number","name": "number","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Protocol alias","name": "alias","options": {},"type": "TEXT_TYPE"},
+     {"description": "Comment with protocol description","name": "comment","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Line-parsed /etc/protocols.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genEtcProtocols",
+    "name": "etc_protocols",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Service name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Service port number","name": "port","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional space separated list of other names for a service","name": "aliases","options": {},"type": "TEXT_TYPE"},
+     {"description": "Optional comment for a service.","name": "comment","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Line-parsed /etc/services.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genEtcServices",
+    "name": "etc_services",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Must provide a path or directory","name": "path","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
+     {"description": "Must provide a path or directory","name": "directory","options": {"required": true},"type": "TEXT_TYPE"},
+     {"description": "MD5 hash of provided filesystem data","name": "md5","options": {},"type": "TEXT_TYPE"},
+     {"description": "SHA1 hash of provided filesystem data","name": "sha1","options": {},"type": "TEXT_TYPE"},
+     {"description": "SHA256 hash of provided filesystem data","name": "sha256","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Filesystem hash data.",
+    "examples": [
+     "select * from hash where path = '/etc/passwd'",
+     "select * from hash where directory = '/etc/'"
+    ],
+    "foreign_keys": [],
+    "function": "genHash",
+    "name": "hash",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
      {"description": "Interface name","name": "interface","options": {},"type": "TEXT_TYPE"},
      {"description": "Specific address for interface","name": "address","options": {},"type": "TEXT_TYPE"},
      {"description": "Interface netmask","name": "mask","options": {},"type": "TEXT_TYPE"},
      {"description": "Broadcast address for the interface","name": "broadcast","options": {},"type": "TEXT_TYPE"},
-     {"description": "PtP address for the interface","name": "point_to_point","options": {},"type": "TEXT_TYPE"}
+     {"description": "PtP address for the interface","name": "point_to_point","options": {},"type": "TEXT_TYPE"},
+     {"description": "Type of address. One of dhcp, manual, auto, other","name": "type","options": {},"type": "TEXT_TYPE"}
     ],
     "description": "Network interfaces and relevant metadata.",
     "examples": [],
@@ -2449,38 +3581,193 @@
      {"description": "Interface type (includes virtual)","name": "type","options": {},"type": "INTEGER_TYPE"},
      {"description": "Network MTU","name": "mtu","options": {},"type": "INTEGER_TYPE"},
      {"description": "Metric based on the speed of the interface","name": "metric","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Flags (netdevice) for the device","name": "flags","options": {},"type": "INTEGER_TYPE"},
      {"description": "Input packets","name": "ipackets","options": {},"type": "BIGINT_TYPE"},
      {"description": "Output packets","name": "opackets","options": {},"type": "BIGINT_TYPE"},
      {"description": "Input bytes","name": "ibytes","options": {},"type": "BIGINT_TYPE"},
      {"description": "Output bytes","name": "obytes","options": {},"type": "BIGINT_TYPE"},
      {"description": "Input errors","name": "ierrors","options": {},"type": "BIGINT_TYPE"},
      {"description": "Output errors","name": "oerrors","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Input drops","name": "idrops","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Output drops","name": "odrops","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Packet Collisions detected","name": "collisions","options": {},"type": "BIGINT_TYPE"},
      {"description": "Time of last device modification (optional)","name": "last_change","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Short description of the object\u2014a one-line string.","name": "description","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the network adapter's manufacturer.","name": "manufacturer","options": {},"type": "TEXT_TYPE"},
-     {"description": "Name of the network connection as it appears in the Network Connections Control Panel program.","name": "connection_id","options": {},"type": "TEXT_TYPE"},
-     {"description": "State of the network adapter connection to the network.","name": "connection_status","options": {},"type": "TEXT_TYPE"},
-     {"description": "Indicates whether the adapter is enabled or not.","name": "enabled","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Indicates whether the adapter is a physical or a logical adapter.","name": "physical_adapter","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Estimate of the current bandwidth in bits per second.","name": "speed","options": {},"type": "INTEGER_TYPE"},
-     {"description": "If TRUE, the dynamic host configuration protocol (DHCP) server automatically assigns an IP address to the computer system when establishing a network connection.","name": "dhcp_enabled","options": {},"type": "INTEGER_TYPE"},
-     {"description": "Expiration date and time for a leased IP address that was assigned to the computer by the dynamic host configuration protocol (DHCP) server.","name": "dhcp_lease_expires","options": {},"type": "TEXT_TYPE"},
-     {"description": "Date and time the lease was obtained for the IP address assigned to the computer by the dynamic host configuration protocol (DHCP) server.","name": "dhcp_lease_obtained","options": {},"type": "TEXT_TYPE"},
-     {"description": "IP address of the dynamic host configuration protocol (DHCP) server.","name": "dhcp_server","options": {},"type": "TEXT_TYPE"},
-     {"description": "Organization name followed by a period and an extension that indicates the type of organization, such as 'microsoft.com'.","name": "dns_domain","options": {},"type": "TEXT_TYPE"},
-     {"description": "Array of DNS domain suffixes to be appended to the end of host names during name resolution.","name": "dns_domain_suffix_search_order","options": {},"type": "TEXT_TYPE"},
-     {"description": "Host name used to identify the local computer for authentication by some utilities.","name": "dns_host_name","options": {},"type": "TEXT_TYPE"},
-     {"description": "Array of server IP addresses to be used in querying for DNS servers.","name": "dns_server_search_order","options": {},"type": "TEXT_TYPE"}
+     {"description": "Short description of the object\u2014a one-line string.","name": "description","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Name of the network adapter's manufacturer.","name": "manufacturer","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Name of the network connection as it appears in the Network Connections Control Panel program.","name": "connection_id","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "State of the network adapter connection to the network.","name": "connection_status","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Indicates whether the adapter is enabled or not.","name": "enabled","options": {"hidden": true},"type": "INTEGER_TYPE"},
+     {"description": "Indicates whether the adapter is a physical or a logical adapter.","name": "physical_adapter","options": {"hidden": true},"type": "INTEGER_TYPE"},
+     {"description": "Estimate of the current bandwidth in bits per second.","name": "speed","options": {"hidden": true},"type": "INTEGER_TYPE"},
+     {"description": "If TRUE, the dynamic host configuration protocol (DHCP) server automatically assigns an IP address to the computer system when establishing a network connection.","name": "dhcp_enabled","options": {"hidden": true},"type": "INTEGER_TYPE"},
+     {"description": "Expiration date and time for a leased IP address that was assigned to the computer by the dynamic host configuration protocol (DHCP) server.","name": "dhcp_lease_expires","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Date and time the lease was obtained for the IP address assigned to the computer by the dynamic host configuration protocol (DHCP) server.","name": "dhcp_lease_obtained","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "IP address of the dynamic host configuration protocol (DHCP) server.","name": "dhcp_server","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Organization name followed by a period and an extension that indicates the type of organization, such as 'microsoft.com'.","name": "dns_domain","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Array of DNS domain suffixes to be appended to the end of host names during name resolution.","name": "dns_domain_suffix_search_order","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Host name used to identify the local computer for authentication by some utilities.","name": "dns_host_name","options": {"hidden": true},"type": "TEXT_TYPE"},
+     {"description": "Array of server IP addresses to be used in querying for DNS servers.","name": "dns_server_search_order","options": {"hidden": true},"type": "TEXT_TYPE"}
     ],
     "description": "Detailed information and stats of network interfaces.",
-    "examples": [],
+    "examples": [
+     "select interface, mac, type, idrops as input_drops from interface_details;",
+     "select interface, mac, type, flags, (1<<8) as promisc_flag from interface_details where (flags & promisc_flag) > 0;",
+     "select interface, mac, type, flags, (1<<3) as loopback_flag from interface_details where (flags & loopback_flag) > 0;"
+    ],
     "foreign_keys": [],
     "function": "genInterfaceDetails",
     "name": "interface_details",
     "profile": {}
    },
    {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Kernel version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Kernel arguments","name": "arguments","options": {},"type": "TEXT_TYPE"},
+     {"description": "Kernel path","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Kernel device identifier","name": "device","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Basic active kernel information.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genKernelInfo",
+    "name": "kernel_info",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Transport layer port","name": "port","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Network protocol (IPv4, IPv6)","name": "family","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Specific address for bind","name": "address","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Processes with listening (bound) network sockets/ports.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genListeningPorts",
+    "name": "listening_ports",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Login type","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "User login name","name": "user","options": {},"type": "TEXT_TYPE"},
+     {"description": "Device name","name": "tty","options": {},"type": "TEXT_TYPE"},
+     {"description": "Remote hostname","name": "host","options": {},"type": "TEXT_TYPE"},
+     {"description": "Time entry was made","name": "time","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Process (or thread) ID","name": "pid","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Users with an active shell on the system.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genLoggedInUsers",
+    "name": "logged_in_users",
+    "profile": {}
+   },
+   {
     "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Distribution or product name","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Pretty, suitable for presentation, OS version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Major release version","name": "major","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Minor release version","name": "minor","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Optional patch release","name": "patch","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Optional build-specific or variant string","name": "build","options": {},"type": "TEXT_TYPE"},
+     {"description": "OS Platform or ID","name": "platform","options": {},"type": "TEXT_TYPE"},
+     {"description": "Closely related platforms","name": "platform_like","options": {},"type": "TEXT_TYPE"},
+     {"description": "OS version codename","name": "codename","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "A single row containing the operating system name and version.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genOSVersion",
+    "name": "os_version",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Platform code vendor","name": "vendor","options": {},"type": "TEXT_TYPE"},
+     {"description": "Platform code version","name": "version","options": {},"type": "TEXT_TYPE"},
+     {"description": "Self-reported platform code update date","name": "date","options": {},"type": "TEXT_TYPE"},
+     {"description": "BIOS major and minor revision","name": "revision","options": {},"type": "TEXT_TYPE"},
+     {"description": "Relative address of firmware mapping","name": "address","options": {},"type": "TEXT_TYPE"},
+     {"description": "Size in bytes of firmware","name": "size","options": {},"type": "TEXT_TYPE"},
+     {"description": "(Optional) size of firmware volume","name": "volume_size","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Platform-specific additional information","name": "extra","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Information about EFI/UEFI/ROM and platform/boot.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genPlatformInfo",
+    "name": "platform_info",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Process (or thread) ID","name": "pid","options": {"index": true},"type": "INTEGER_TYPE"},
+     {"description": "Virtual start address (hex)","name": "start","options": {},"type": "TEXT_TYPE"},
+     {"description": "Virtual end address (hex)","name": "end","options": {},"type": "TEXT_TYPE"},
+     {"description": "r=read, w=write, x=execute, p=private (cow)","name": "permissions","options": {},"type": "TEXT_TYPE"},
+     {"description": "Offset into mapped path","name": "offset","options": {},"type": "BIGINT_TYPE"},
+     {"description": "MA:MI Major/minor device ID","name": "device","options": {},"type": "TEXT_TYPE"},
+     {"description": "Mapped path inode, 0 means uninitialized (BSS)","name": "inode","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Path to mapped file or mapped type","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "1 If path is a pseudo path, else 0","name": "pseudo","options": {},"type": "INTEGER_TYPE"}
+    ],
+    "description": "Process memory mapped files and pseudo device/regions.",
+    "examples": [
+     "select * from process_memory_map where pid = 1"
+    ],
+    "foreign_keys": [],
+    "function": "genProcessMemoryMap",
+    "name": "process_memory_map",
+    "profile": {}
+   },
+   {
+    "attributes": {},
+    "blacklisted": false,
+    "columns": [
+     {"description": "Process (or thread) ID","name": "pid","options": {"index": true},"type": "INTEGER_TYPE"},
+     {"description": "Socket file descriptor number","name": "fd","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Socket handle or inode number","name": "socket","options": {},"type": "BIGINT_TYPE"},
+     {"description": "Network protocol (IPv4, IPv6)","name": "family","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Transport protocol (TCP/UDP)","name": "protocol","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Socket local address","name": "local_address","options": {},"type": "TEXT_TYPE"},
+     {"description": "Socket remote address","name": "remote_address","options": {},"type": "TEXT_TYPE"},
+     {"description": "Socket local port","name": "local_port","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Socket remote port","name": "remote_port","options": {},"type": "INTEGER_TYPE"},
+     {"description": "For UNIX sockets (family=AF_UNIX), the domain path","name": "path","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Processes which have open network sockets on the system.",
+    "examples": [
+     "select * from process_open_sockets where pid = 1"
+    ],
+    "foreign_keys": [],
+    "function": "genOpenSockets",
+    "name": "process_open_sockets",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
     "blacklisted": false,
     "columns": [
      {"description": "Process (or thread) ID","name": "pid","options": {"index": true},"type": "BIGINT_TYPE"},
@@ -2518,6 +3805,50 @@
     "profile": {}
    },
    {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Destination IP address","name": "destination","options": {},"type": "TEXT_TYPE"},
+     {"description": "Netmask length","name": "netmask","options": {},"type": "TEXT_TYPE"},
+     {"description": "Route gateway","name": "gateway","options": {},"type": "TEXT_TYPE"},
+     {"description": "Route source","name": "source","options": {},"type": "TEXT_TYPE"},
+     {"description": "Flags to describe route","name": "flags","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Route local interface","name": "interface","options": {},"type": "TEXT_TYPE"},
+     {"description": "Maximum Transmission Unit for the route","name": "mtu","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Cost of route. Lowest is preferred","name": "metric","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Type of route","name": "type","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "The active route table for the host system.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genRoutes",
+    "name": "routes",
+    "profile": {}
+   },
+   {
+    "attributes": {
+     "cacheable": true
+    },
+    "blacklisted": false,
+    "columns": [
+     {"description": "Name of startup item","name": "name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Path of startup item","name": "path","options": {},"type": "TEXT_TYPE"},
+     {"description": "Arguments provided to startup executable","name": "args","options": {},"type": "TEXT_TYPE"},
+     {"description": "Startup Item or Login Item","name": "type","options": {},"type": "TEXT_TYPE"},
+     {"description": "Directory or plist containing startup item","name": "source","options": {},"type": "TEXT_TYPE"},
+     {"description": "Startup status; either enabled or disabled","name": "status","options": {},"type": "TEXT_TYPE"},
+     {"description": "The user associated with the startup item","name": "username","options": {},"type": "TEXT_TYPE"}
+    ],
+    "description": "Applications and binaries set as user/login startup items.",
+    "examples": [],
+    "foreign_keys": [],
+    "function": "genStartupItems",
+    "name": "startup_items",
+    "profile": {}
+   },
+   {
     "attributes": {},
     "blacklisted": false,
     "columns": [
@@ -2533,7 +3864,8 @@
      {"description": "Hardware or board model","name": "hardware_model","options": {},"type": "TEXT_TYPE"},
      {"description": "Hardware or board version","name": "hardware_version","options": {},"type": "TEXT_TYPE"},
      {"description": "Device or board serial number","name": "hardware_serial","options": {},"type": "TEXT_TYPE"},
-     {"description": "Friendly computer name (optional)","name": "computer_name","options": {},"type": "TEXT_TYPE"}
+     {"description": "Friendly computer name (optional)","name": "computer_name","options": {},"type": "TEXT_TYPE"},
+     {"description": "Local hostname (optional)","name": "local_hostname","options": {},"type": "TEXT_TYPE"}
     ],
     "description": "System information for identification.",
     "examples": [],
@@ -2567,7 +3899,7 @@
      {"description": "Group ID (unsigned)","name": "gid","options": {},"type": "BIGINT_TYPE"},
      {"description": "User ID as int64 signed (Apple)","name": "uid_signed","options": {},"type": "BIGINT_TYPE"},
      {"description": "Default group ID as int64 signed (Apple)","name": "gid_signed","options": {},"type": "BIGINT_TYPE"},
-     {"description": "Username","name": "username","options": {},"type": "TEXT_TYPE"},
+     {"description": "Username","name": "username","options": {"additional": true},"type": "TEXT_TYPE"},
      {"description": "Optional user description","name": "description","options": {},"type": "TEXT_TYPE"},
      {"description": "User's home directory","name": "directory","options": {},"type": "TEXT_TYPE"},
      {"description": "User's configured default shell","name": "shell","options": {},"type": "TEXT_TYPE"},
@@ -2611,6 +3943,7 @@
      {"description": "Last status change time","name": "ctime","options": {},"type": "BIGINT_TYPE"},
      {"description": "(B)irth or (cr)eate time","name": "btime","options": {},"type": "BIGINT_TYPE"},
      {"description": "Number of hard links","name": "hard_links","options": {},"type": "INTEGER_TYPE"},
+     {"description": "1 if the path is a symlink, otherwise 0","name": "symlink","options": {},"type": "INTEGER_TYPE"},
      {"description": "File status","name": "type","options": {},"type": "TEXT_TYPE"}
     ],
     "description": "Interactive filesystem attributes and metadata.",
@@ -2622,28 +3955,6 @@
     "foreign_keys": [],
     "function": "genFile",
     "name": "file",
-    "profile": {}
-   },
-   {
-    "attributes": {
-     "utility": true
-    },
-    "blacklisted": false,
-    "columns": [
-     {"description": "Must provide a path or directory","name": "path","options": {"index": true,"required": true},"type": "TEXT_TYPE"},
-     {"description": "Must provide a path or directory","name": "directory","options": {"required": true},"type": "TEXT_TYPE"},
-     {"description": "MD5 hash of provided filesystem data","name": "md5","options": {},"type": "TEXT_TYPE"},
-     {"description": "SHA1 hash of provided filesystem data","name": "sha1","options": {},"type": "TEXT_TYPE"},
-     {"description": "SHA256 hash of provided filesystem data","name": "sha256","options": {},"type": "TEXT_TYPE"}
-    ],
-    "description": "Filesystem hash data.",
-    "examples": [
-     "select * from hash where path = '/etc/passwd'",
-     "select * from hash where directory = '/etc/'"
-    ],
-    "foreign_keys": [],
-    "function": "genHash",
-    "name": "hash",
     "profile": {}
    },
    {
@@ -2714,6 +4025,8 @@
     "blacklisted": false,
     "columns": [
      {"description": "Process (or thread/handle) ID","name": "pid","options": {},"type": "INTEGER_TYPE"},
+     {"description": "Unique ID provided by the system","name": "uuid","options": {},"type": "TEXT_TYPE"},
+     {"description": "Unique, long-lived ID per instance of osquery","name": "instance_id","options": {},"type": "TEXT_TYPE"},
      {"description": "osquery toolkit version","name": "version","options": {},"type": "TEXT_TYPE"},
      {"description": "Hash of the working configuration state","name": "config_hash","options": {},"type": "TEXT_TYPE"},
      {"description": "1 if the config was loaded and considered valid, else 0","name": "config_valid","options": {},"type": "INTEGER_TYPE"},
