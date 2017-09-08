@@ -192,3 +192,21 @@
 .ace-kolide .ace_indent-guide {
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgbYnAAAAE0lEQVQImWP4////f4bdu3f/BwAlfgctduB85QAAAABJRU5ErkJggg==) right repeat-y;
 }
+
+.ace_editor.ace-kolide.ace_autocomplete {
+  -webkit-transform: translate(10px, 20px);
+  transform: translate(10px, 20px);
+  background-color: #fff;
+}
+
+.ace_editor.ace-kolide.ace_autocomplete .ace_scroller {
+  top: 0;
+}
+
+.ace_editor.ace-kolide.ace_autocomplete .ace_content {
+  padding-left: 0;
+}
+
+.ace_editor.ace-kolide.ace_autocomplete .ace_active-line {
+  display: block;
+}
