@@ -10,13 +10,13 @@
 }
 
 .ace_editor.ace-kolide.ace_focus {
-  border-top: solid 1px rgba(74, 157, 255, 0.5);
-  border-bottom: solid 1px rgba(74, 157, 255, 0.5);
-  box-shadow: inset 0px 4px 8px -6px rgba(74, 157, 255, 0.5), inset 0px -4px 8px -6px rgba(74, 157, 255, 0.5);
+  border-top: solid 1px rgba(63, 100, 237, 0.5);
+  border-bottom: solid 1px rgba(63, 100, 237, 0.5);
+  box-shadow: inset 0px 4px 8px -6px rgba(63, 100, 237, 0.5), inset 0px -4px 8px -6px rgba(63, 100, 237, 0.5);
 }
 
 .ace_editor.ace-kolide.ace_focus .ace_gutter {
-  box-shadow: inset 0px 4px 8px -6px rgba(74, 157, 255, 0.5), inset 0px -4px 8px -6px rgba(74, 157, 255, 0.5);
+  box-shadow: inset 0px 4px 8px -6px rgba(63, 100, 237, 0.5), inset 0px -4px 8px -6px rgba(63, 100, 237, 0.5);
 }
 
 .ace_editor.ace-kolide.ace_focus .ace_marker-layer .ace_active-line,
@@ -87,7 +87,7 @@
 }
 
 .ace-kolide .ace_marker-layer .ace_active-line {
-  background: rgba(74, 157, 255, 0.06);
+  background: rgba(63, 100, 237, 0.06);
   border-radius: 2px;
   transform: translateY(1px);
   display: none;
@@ -105,7 +105,7 @@
 }
 
 .ace-kolide .ace_keyword {
-  color: #4a9dff;
+  color: #3f64ed;
   font-weight: 600;
 }
 
@@ -129,7 +129,7 @@
 }
 
 .ace-kolide .ace_keyword.ace_operator {
-  color: #4a9dff;
+  color: #3f64ed;
 }
 
 .ace-kolide .ace_constant.ace_character,
@@ -152,7 +152,7 @@
 
 .ace-kolide .ace_invalid.ace_deprecated {
   color: #ffffff;
-  background-color: #4a9dff;
+  background-color: #3f64ed;
 }
 
 .ace-kolide .ace_fold {
